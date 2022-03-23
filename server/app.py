@@ -2,11 +2,17 @@ import sqlite3
 import json
 from flask import Flask, request
 
+DATABASE_FILE = "database.db"
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
 
+
+import init_db
+init_db.initdb(DATABASE_FILE)
+
 def get_db_connection():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DATABASE_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -14,14 +20,21 @@ def get_db_connection():
 def index():
     return {"status":"running"}
 
-@app.route('/alldesks')
+@app.route('/users')
+def allusers():
+    conn = get_db_connection()
+    rows = conn.execute('SELECT userid, email FROM users').fetchall()
+    conn.close()
+    return  json.dumps( [dict(ix) for ix in rows] )
+
+@app.route('/desks')
 def alldesks():
     conn = get_db_connection()
     rows = conn.execute('SELECT * FROM desks').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
-@app.route('/allhights')
+@app.route('/hights')
 def allhights():
     conn = get_db_connection()
     rows = conn.execute('SELECT * FROM hights').fetchall()
@@ -29,7 +42,7 @@ def allhights():
     return  json.dumps( [dict(ix) for ix in rows] )
 
 
-@app.route('/hights/<string:userid>')
+@app.route('/hights/u/<string:userid>')
 def hights(userid):
     conn = get_db_connection()
     rows = conn.execute('SELECT * FROM hights WHERE userid = ?', (userid)).fetchall()
@@ -37,7 +50,7 @@ def hights(userid):
     return  json.dumps( [dict(ix) for ix in rows] )
 
 
-@app.route('/addhight', methods=['POST']) 
+@app.route('/hights/add', methods=['POST']) 
 def addhightP():
     data = request.json
     conn = get_db_connection()
@@ -48,7 +61,7 @@ def addhightP():
     return  {"status":"added", "id":cur.lastrowid}
 
 
-@app.route('/addhight/<string:userid>/<string:hight>')
+@app.route('/hights/add/<string:userid>/<string:hight>')
 def addhight(userid, hight):
     conn = get_db_connection()
     cur = conn.cursor()
