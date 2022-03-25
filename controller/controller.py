@@ -44,7 +44,6 @@ print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
 
 # create the webpage with a button to toggle the LED
 def web_page():
-  print("d3 value", d3.value())
   if d0.value() == 0 and d1.value() == 1 and d2.value() == 1:
     up_state="ON"
   else:
@@ -174,7 +173,7 @@ while True:
     d1.value(1)
   if preset2_on == 6:
     print('PRESET 2 ON')
-    d2.value(1)
+    d2.value(0)
   if preset2_off == 6:
     print('PRESET 2 OFF')
     d2.value(1)
