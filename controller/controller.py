@@ -44,11 +44,12 @@ print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
 
 # create the webpage with a button to toggle the LED
 def web_page():
-  if d0.value() == 0:
+  print("d3 value", d3.value())
+  if d0.value() == 0 and d1.value() == 1 and d2.value() == 1:
     up_state="ON"
   else:
     up_state="OFF"
-  if d1.value() == 0:
+  if d0.value() == 1 and d1.value() == 0 and d2.value() == 1:
     down_state="ON"
   else:
     down_state="OFF"
@@ -56,7 +57,7 @@ def web_page():
     preset1_state="ON"
   else:
     preset1_state="OFF"
-  if d2.value() == 0:
+  if d0.value() == 1 and d1.value() == 1 and d2.value() == 0:
     preset2_state="ON"
   else:
     preset2_state="OFF"
@@ -91,27 +92,27 @@ def web_page():
         <p><a href="/?down=on"><button class="button">ON</button></a></p>
         <p><a href="/?down=off"><button class="button button2">OFF</button></a></p>
         
-        <p>Preset 1: <strong>Standing Height</strong></p>
+        <p>Preset 1: <strong>""" + preset1_state + """</strong></p>
         <p><a href="/?preset1=on"><button class="button">ON</button></a></p>
         <p><a href="/?preset1=off"><button class="button button2">OFF</button></a></p>
         
-        <p>Preset 2: <strong>Sitting Height</strong></p>
+        <p>Preset 2: <strong>""" + preset2_state + """</strong></p>
         <p><a href="/?preset2=on"><button class="button">ON</button></a></p>
         <p><a href="/?preset2=off"><button class="button button2">OFF</button></a></p>
         
-        <p>Preset 3: <strong>TBD</strong></p>
+        <p>Preset 3: <strong>""" + preset3_state + """</strong></p>
         <p><a href="/?preset3=on"><button class="button">ON</button></a></p>
         <p><a href="/?preset3=off"><button class="button button2">OFF</button></a></p>
         
-        <p>Preset 4: <strong>TBD</strong></p>
+        <p>Preset 4: <strong>""" + preset4_state + """</strong></p>
         <p><a href="/?preset4=on"><button class="button">ON</button></a></p>
         <p><a href="/?preset4=off"><button class="button button2">OFF</button></a></p>
         
-        <p>M: <strong>Modify a Preset</strong></p>
+        <p>Modify a Preset: <strong>""" + mbutton_state + """</strong></p>
         <p><a href="/?mbutton=on"><button class="button">ON</button></a></p>
         <p><a href="/?mbutton=off"><button class="button button2">OFF</button></a></p>
         
-        
+    
       </body>
       </html>"""
   return html
@@ -174,14 +175,14 @@ while True:
   if preset2_on == 6:
     print('PRESET 2 ON')
     d2.value(1)
-  if preset2_on == 6:
+  if preset2_off == 6:
     print('PRESET 2 OFF')
     d2.value(1)
   if preset3_on == 6:
     print('PRESET 3 ON')
     d1.value(0)
     d2.value(0)
-  if preset3_on == 6:
+  if preset3_off == 6:
     print('PRESET 3 OFF')
     d1.value(1)
     d2.value(1)
@@ -189,14 +190,14 @@ while True:
     print('PRESET 4 ON')
     d0.value(0)
     d2.value(0)
-  if preset4_on == 6:
+  if preset4_off == 6:
     print('PRESET 4 OFF')
     d0.value(1)
     d2.value(1)
   if mbutton_on == 6:
     print('MBUTTON ON')
     d3.value(0)
-  if mbutton_on == 6:
+  if mbutton_off == 6:
     print('MBUTTON OFF')
     d3.value(1)
   response = web_page()
@@ -205,3 +206,4 @@ while True:
   conn.send('Connection: close\n\n')
   conn.send(response)
   conn.close()
+
