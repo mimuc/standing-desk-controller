@@ -8,7 +8,7 @@
 
 
 import network, socket, time
-from machine import Pin
+from machine import UART, Pin
 
 d0 = Pin(25, Pin.OUT)              #D0, up signal
 d1 = Pin(15, Pin.OUT)              #D1, down signal
@@ -25,7 +25,7 @@ d3.value(1)
 
 Rx = bytearray(8)
 
-#uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                         # init with given baudrate
+uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                         # init with given baudrate
 
 
 SSID ='Nano_RP2040_Connect_test'   # Network SSID
@@ -83,11 +83,11 @@ def web_page():
         <h1>Nano RP2040 Connnect </1>
         <h2>Web Server Test</h2>
         
-        <p>Up state: <strong>""" + up_state + """</strong></p>
+        <p>Up button: <strong>""" + up_state + """</strong></p>
         <p><a href="/?up=on"><button class="button">ON</button></a></p>
         <p><a href="/?up=off"><button class="button button2">OFF</button></a></p>
         
-        <p>Down state: <strong>""" + down_state + """</strong></p>
+        <p>Down button: <strong>""" + down_state + """</strong></p>
         <p><a href="/?down=on"><button class="button">ON</button></a></p>
         <p><a href="/?down=off"><button class="button button2">OFF</button></a></p>
         
@@ -124,6 +124,26 @@ server.listen(5)
 
 # loop to deal with  http requests
 while True:
+  for i in range(0,5):
+    uart.readinto(Rx)         # read all available characters
+    #print("Byte", i)
+    flag1=0
+    flag2=0
+    a=0
+    b=0
+    for x in Rx:
+        if (x == 1 and flag1 == 0):
+            flag1=1
+        elif (x == 1 and flag1 == 1):
+            flag2=1
+        elif (flag1 == 1 and flag2 == 1 and a==0):
+            a=x
+        elif (flag1 == 1 and flag2 ==1):
+            b=x
+            
+    #print(a)
+    #print(b)
+    print(a*256+b)
   conn, addr = server.accept()
   print('Connection from %s' % str(addr))
   request = conn.recv(1024)
@@ -205,4 +225,5 @@ while True:
   conn.send('Connection: close\n\n')
   conn.send(response)
   conn.close()
+
 
