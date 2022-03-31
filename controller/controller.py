@@ -16,10 +16,10 @@ d2 = Pin(16, Pin.OUT)              #D2, preset 2 signal
 d3 = Pin(17, Pin.OUT)              #D3, M signal
 
 # set all pins to high (high = inactive)
-d0.value(1)
-d1.value(1)
-d2.value(1)
-d3.value(1)
+d0.value(0)
+d1.value(0)
+d2.value(0)
+d3.value(0)
 
 
 
@@ -44,31 +44,35 @@ print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
 
 # create the webpage with a button to toggle the LED
 def web_page():
-  if d0.value() == 0 and d1.value() == 1 and d2.value() == 1:
+  print("d0: ", d0.value())
+  print("d1: ", d1.value())
+  print("d2: ", d2.value())
+  print("d3: ", d3.value())
+  if d0.value() == 1 and d1.value() == 0 and d2.value() == 0:
     up_state="ON"
   else:
     up_state="OFF"
-  if d0.value() == 1 and d1.value() == 0 and d2.value() == 1:
+  if d0.value() == 0 and d1.value() == 1 and d2.value() == 0:
     down_state="ON"
   else:
     down_state="OFF"
-  if d0.value() == 0 and d1.value() == 0:
+  if d0.value() == 1 and d1.value() == 1:
     preset1_state="ON"
   else:
     preset1_state="OFF"
-  if d0.value() == 1 and d1.value() == 1 and d2.value() == 0:
+  if d0.value() == 0 and d1.value() == 0 and d2.value() == 1:
     preset2_state="ON"
   else:
     preset2_state="OFF"
-  if d1.value() == 0 and d2.value() == 0:
+  if d1.value() == 1 and d2.value() == 1:
     preset3_state="ON"
   else:
     preset3_state="OFF"
-  if d0.value() == 0 and d2.value() == 0:
+  if d0.value() == 1 and d2.value() == 1:
     preset4_state="ON"
   else:
     preset4_state="OFF"
-  if d3.value() == 0:
+  if d3.value() == 1:
     mbutton_state="ON"
   else:
     mbutton_state="OFF"
@@ -173,52 +177,88 @@ while True:
   # request is 'GET /?d0=on' or 'GET /?d0=off' - the string starts at position 6 (counting starts at 0)
   if up_on == 6:
     print('UP ON')
-    d0.value(0)
+    d0.value(1)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   if up_off == 6:
     print('UP OFF')
-    d0.value(1)
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   if down_on == 6:
     print('DOWN ON')
-    d1.value(0)
+    d0.value(0)
+    d1.value(1)
+    d2.value(0)
+    d3.value(0)
   if down_off == 6:
     print('DOWN OFF')
-    d1.value(1)
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   if preset1_on == 6:
     print('PRESET 1 ON')
-    d0.value(0)
-    d1.value(0)
+    d0.value(1)
+    d1.value(1)
+    d2.value(0)
+    d3.value(0)
   if preset1_off == 6:
     print('PRESET 1 OFF')
-    d0.value(1)
-    d1.value(1)
-  if preset2_on == 6:
-    print('PRESET 2 ON')
-    d2.value(0)
-  if preset2_off == 6:
-    print('PRESET 2 OFF')
-    d2.value(1)
-  if preset3_on == 6:
-    print('PRESET 3 ON')
+    d0.value(0)
     d1.value(0)
     d2.value(0)
-  if preset3_off == 6:
-    print('PRESET 3 OFF')
+    d3.value(0)
+  if preset2_on == 6:
+    print('PRESET 2 ON')
+    d0.value(0)
+    d1.value(0)
+    d2.value(1)
+    d3.value(0)
+  if preset2_off == 6:
+    print('PRESET 2 OFF')
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
+  if preset3_on == 6:
+    print('PRESET 3 ON')
+    d0.value(0)
     d1.value(1)
     d2.value(1)
+    d3.value(0)
+  if preset3_off == 6:
+    print('PRESET 3 OFF')
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   if preset4_on == 6:
     print('PRESET 4 ON')
-    d0.value(0)
-    d2.value(0)
+    d0.value(1)
+    d1.value(0)
+    d2.value(1)
+    d3.value(0)
   if preset4_off == 6:
     print('PRESET 4 OFF')
-    d0.value(1)
-    d2.value(1)
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   if mbutton_on == 6:
     print('MBUTTON ON')
-    d3.value(0)
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(1)
   if mbutton_off == 6:
     print('MBUTTON OFF')
-    d3.value(1)
+    d0.value(0)
+    d1.value(0)
+    d2.value(0)
+    d3.value(0)
   response = web_page()
   conn.send('HTTP/1.1 200 OK\n')
   conn.send('Content-Type: text/html\n')
