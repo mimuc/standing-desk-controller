@@ -15,7 +15,6 @@ d1 = Pin(15, Pin.OUT)              #D1, down signal
 d2 = Pin(16, Pin.OUT)              #D2, preset 2 signal
 d3 = Pin(17, Pin.OUT)              #D3, M signal
 
-
 d0in = Pin(13, Pin.IN)              #D0, up signal
 d1in = Pin(12, Pin.IN)              #D1, down signal
 
@@ -135,9 +134,8 @@ server.listen(5)
 
 # loop to deal with  http requests
 while True:
-  for i in range(0,5):
+  for i in range(0,100):
     uart.readinto(Rx)         # read all available characters
-    #print("Byte", i)
     flag1=0
     flag2=0
     a=0
@@ -152,9 +150,8 @@ while True:
         elif (flag1 == 1 and flag2 ==1):
             b=x
             
-    #print(a)
-    #print(b)
-    print(a*256+b)
+
+  print("height:", a*256+b)
   conn, addr = server.accept()
   print('Connection from %s' % str(addr))
   request = conn.recv(1024)
