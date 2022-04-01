@@ -15,6 +15,10 @@ d1 = Pin(15, Pin.OUT)              #D1, down signal
 d2 = Pin(16, Pin.OUT)              #D2, preset 2 signal
 d3 = Pin(17, Pin.OUT)              #D3, M signal
 
+
+d0in = Pin(13, Pin.IN)              #D0, up signal
+d1in = Pin(12, Pin.IN)              #D1, down signal
+
 # set all pins to high (high = inactive)
 d0.value(0)
 d1.value(0)
@@ -48,6 +52,9 @@ def web_page():
   print("d1: ", d1.value())
   print("d2: ", d2.value())
   print("d3: ", d3.value())
+  print("---in---")
+  print("d0: ", d0in.value())
+  print("d1: ", d1in.value())
   if d0.value() == 1 and d1.value() == 0 and d2.value() == 0:
     up_state="ON"
   else:
