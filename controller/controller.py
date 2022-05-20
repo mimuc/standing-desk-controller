@@ -9,6 +9,44 @@
 
 import network, socket, time
 from machine import UART, Pin
+import ubinascii
+
+import urequests as requests
+import json
+# from netvars import setNetVar, getNetVar, initNet
+import _thread
+
+
+# For threading
+# S = Semaphore(16)
+
+
+ssid = "HCUM"
+passwd = "wearedoingresearch."
+
+# # assuming there is a network with ssid hotspot1 and password 123456789
+# connect to wifi
+def connectToWifi(ssid, passwd):
+    try:
+        wlan = network.WLAN(network.STA_IF)
+        wlan.active(True)
+        if not wlan.isconnected():
+            print('connecting to network...')
+            wlan.connect(ssid, passwd)
+        while not wlan.isconnected():
+            pass
+    
+        print('network config:', wlan.ifconfig())
+        return wlan
+    except:
+        return connectToWifi(ssid, passwd)
+    
+wlan = connectToWifi(ssid, passwd)
+
+# IPv4 address
+serverUrl = 'http://10.163.181.50:5000/heights/add'
+# serverUrl = 'http://127.0.0.1:5000/heights/add'
+
 
 d0 = Pin(25, Pin.OUT)              #D0, up signal
 d1 = Pin(15, Pin.OUT)              #D1, down signal
@@ -27,247 +65,106 @@ d3.value(0)
 
 
 Rx = bytearray(8)
-
 uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                         # init with given baudrate
 
 
-SSID ='Nano_RP2040_Connect_test'   # Network SSID
-KEY  ='12345678'                 # Network key (should be 8 chars) - for real use, choose a safe one
+# SSID ='Nano_RP2040_Connect_test'   # Network SSID
+# KEY  ='12345678'                 # Network key (should be 8 chars) - for real use, choose a safe one
 HOST = ''
 PORT = 80                          # 80 ist the http standard port, can also use non-privileged port e.g. 8080
+# 
+# # Init wlan module and connect to network
+# wlan = network.WLAN(network.AP_IF)
+# wlan.active(True)
+# # it seems in this version the AP mode only supports WEP
+# wlan.config(essid=SSID, key=KEY, security=wlan.WEP, channel=2)
 
-# Init wlan module and connect to network
-wlan = network.WLAN(network.AP_IF)
-wlan.active(True)
-# it seems in this version the AP mode only supports WEP
-wlan.config(essid=SSID, key=KEY, security=wlan.WEP, channel=2)
-
-print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
+# print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
+mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+print("mac address: ", mac)
 
 
-# create the webpage with a button to toggle the LED
-def web_page():
-  print("d0: ", d0.value())
-  print("d1: ", d1.value())
-  print("d2: ", d2.value())
-  print("d3: ", d3.value())
-  print("---in---")
-  print("d0: ", d0in.value())
-  print("d1: ", d1in.value())
-  if d0.value() == 1 and d1.value() == 0 and d2.value() == 0:
-    up_state="ON"
-  else:
-    up_state="OFF"
-  if d0.value() == 0 and d1.value() == 1 and d2.value() == 0:
-    down_state="ON"
-  else:
-    down_state="OFF"
-  if d0.value() == 1 and d1.value() == 1:
-    preset1_state="ON"
-  else:
-    preset1_state="OFF"
-  if d0.value() == 0 and d1.value() == 0 and d2.value() == 1:
-    preset2_state="ON"
-  else:
-    preset2_state="OFF"
-  if d1.value() == 1 and d2.value() == 1:
-    preset3_state="ON"
-  else:
-    preset3_state="OFF"
-  if d0.value() == 1 and d2.value() == 1:
-    preset4_state="ON"
-  else:
-    preset4_state="OFF"
-  if d3.value() == 1:
-    mbutton_state="ON"
-  else:
-    mbutton_state="OFF"
-    
-  
-  html ="""<html><head>
-      <title>Nano RP2040 Connnect Web Server</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="icon" href="data:,">
-      </head>
-      <body>
-        <h1>Nano RP2040 Connnect </1>
-        <h2>Web Server Test</h2>
-        
-        <p>Up button: <strong>""" + up_state + """</strong></p>
-        <p><a href="/?up=on"><button class="button">ON</button></a></p>
-        <p><a href="/?up=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Down button: <strong>""" + down_state + """</strong></p>
-        <p><a href="/?down=on"><button class="button">ON</button></a></p>
-        <p><a href="/?down=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Preset 1: <strong>""" + preset1_state + """</strong></p>
-        <p><a href="/?preset1=on"><button class="button">ON</button></a></p>
-        <p><a href="/?preset1=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Preset 2: <strong>""" + preset2_state + """</strong></p>
-        <p><a href="/?preset2=on"><button class="button">ON</button></a></p>
-        <p><a href="/?preset2=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Preset 3: <strong>""" + preset3_state + """</strong></p>
-        <p><a href="/?preset3=on"><button class="button">ON</button></a></p>
-        <p><a href="/?preset3=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Preset 4: <strong>""" + preset4_state + """</strong></p>
-        <p><a href="/?preset4=on"><button class="button">ON</button></a></p>
-        <p><a href="/?preset4=off"><button class="button button2">OFF</button></a></p>
-        
-        <p>Modify a Preset: <strong>""" + mbutton_state + """</strong></p>
-        <p><a href="/?mbutton=on"><button class="button">ON</button></a></p>
-        <p><a href="/?mbutton=off"><button class="button button2">OFF</button></a></p>
-        
-    
-      </body>
-      </html>"""
-  return html
 
-# get started with setting up the sever sockedt
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# Bind and listen
-server.bind([HOST, PORT])
-server.listen(5)
 
+def post_request(req_data):
+#     try:
+    global serverUrl
+    #print(_thread.get_ident())
+    header = {'Content-Type': 'application/json; charset=utf-8'}
+    r = requests.post(serverUrl, json=req_data, headers=header)
+    print(r.json())
+    r.close()
+#     except Exception as e:
+#         global buffer
+#         buffer.append(req_data)
+#         print("T Done with error", e)
+#         time.sleep(1)
+#         isDoneThread = True
+#         _thread.exit()
+        
+        
+
+buffer =[]
+lastHeight = -1      
 # loop to deal with  http requests
 while True:
-  for i in range(0,100):
-    uart.readinto(Rx)         # read all available characters
-    flag1=0
-    flag2=0
-    a=0
-    b=0
-    for x in Rx:
-        if (x == 1 and flag1 == 0):
-            flag1=1
-        elif (x == 1 and flag1 == 1):
-            flag2=1
-        elif (flag1 == 1 and flag2 == 1 and a==0):
-            a=x
-        elif (flag1 == 1 and flag2 ==1):
-            b=x
-            
+  #for i in range(0,100):
+  uart.readinto(Rx)         # read all available characters
+  flag1=0
+  flag2=0
+  flag3=0
+  a=0
+  b=0
+  for x in Rx:
+    if (x == 1 and flag1 == 0):
+      flag1=1
+    elif (x == 1 and flag1 == 1):
+      flag2=1
+    elif (flag1 == 1 and flag2 == 1 and a==0):
+      a=x
+    elif (flag1 == 1 and flag2 ==1 and flag3 == 0):
+      b=x
+      flag3=1
+  Rx=bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00')
+      
+  #print(int(a), int(b), len(buffer))
+  # Start sending when idle
+  if ((int(a) == 0) & (int(b)==0) & (len(buffer) > 1) & (wlan.isconnected())):
+      lstHeight = []
+      lstTime = []
+      for e in buffer:
+          lstHeight.append(e["height"])
+          lstTime.append(e["time"])
+      if (len(lstHeight) > 0):
+          #print(a, b, len(buffer))
+          post_data = {'macaddress': mac,
+                        'heights': lstHeight,
+                        'times': lstTime
+                        }
+          try:
+              post_request(post_data)
+              buffer = []
+          except Exception as e:
+              print("Exception", str(e))
+              time.sleep(0.1)
+              buffer.append(post_data)
+     
 
-  print("height:", a*256+b)
-  conn, addr = server.accept()
-  print('Connection from %s' % str(addr))
-  request = conn.recv(1024)
-  request = str(request)
-  print('Request Content = %s' % request)
-  # check if the request includes up=on or off
-  up_on = request.find('/?up=on')
-  up_off = request.find('/?up=off')
-  # check if the request includes down=on or off
-  down_on = request.find('/?down=on')
-  down_off = request.find('/?down=off')
-  # check if the request includes preset1=on or off
-  preset1_on = request.find('/?preset1=on')
-  preset1_off = request.find('/?preset1=off')
-  # check if the request includes preset1=on or off
-  preset2_on = request.find('/?preset2=on')
-  preset2_off = request.find('/?preset2=off')
-  # check if the request includes preset1=on or off
-  preset3_on = request.find('/?preset3=on')
-  preset3_off = request.find('/?preset3=off')
-  # check if the request includes preset1=on or off
-  preset4_on = request.find('/?preset4=on')
-  preset4_off = request.find('/?preset4=off')
-  # check if the request includes preset1=on or off
-  mbutton_on = request.find('/?mbutton=on')
-  mbutton_off = request.find('/?mbutton=off')
-  # request is 'GET /?d0=on' or 'GET /?d0=off' - the string starts at position 6 (counting starts at 0)
-  if up_on == 6:
-    print('UP ON')
-    d0.value(1)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if up_off == 6:
-    print('UP OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if down_on == 6:
-    print('DOWN ON')
-    d0.value(0)
-    d1.value(1)
-    d2.value(0)
-    d3.value(0)
-  if down_off == 6:
-    print('DOWN OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if preset1_on == 6:
-    print('PRESET 1 ON')
-    d0.value(1)
-    d1.value(1)
-    d2.value(0)
-    d3.value(0)
-  if preset1_off == 6:
-    print('PRESET 1 OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if preset2_on == 6:
-    print('PRESET 2 ON')
-    d0.value(0)
-    d1.value(0)
-    d2.value(1)
-    d3.value(0)
-  if preset2_off == 6:
-    print('PRESET 2 OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if preset3_on == 6:
-    print('PRESET 3 ON')
-    d0.value(0)
-    d1.value(1)
-    d2.value(1)
-    d3.value(0)
-  if preset3_off == 6:
-    print('PRESET 3 OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if preset4_on == 6:
-    print('PRESET 4 ON')
-    d0.value(1)
-    d1.value(0)
-    d2.value(1)
-    d3.value(0)
-  if preset4_off == 6:
-    print('PRESET 4 OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  if mbutton_on == 6:
-    print('MBUTTON ON')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(1)
-  if mbutton_off == 6:
-    print('MBUTTON OFF')
-    d0.value(0)
-    d1.value(0)
-    d2.value(0)
-    d3.value(0)
-  response = web_page()
-  conn.send('HTTP/1.1 200 OK\n')
-  conn.send('Content-Type: text/html\n')
-  conn.send('Connection: close\n\n')
-  conn.send(response)
-  conn.close()
+  #print(a, b)          
+  currentHeight = a*256+b
+  if ((lastHeight != currentHeight) & (int(a) != 0) & (int(b) != 0)):
+          
+      print("height:", currentHeight)
+      post_data = {'macaddress': mac,
+                    'height': currentHeight,
+                    'time': int(1000*time.time())
+                    }
+      
+      buffer.append(post_data)
+
+      lastHeight = currentHeight
+      
+  if not wlan.isconnected():
+      wlan = connectToWifi(ssid, passwd)
 
 

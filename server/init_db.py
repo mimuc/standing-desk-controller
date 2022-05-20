@@ -24,20 +24,31 @@ def initdb(file, overwrite=None):
         cur = connection.cursor()
 
 
-        cur.execute("INSERT INTO users (username, passwd, email, name, room, status) VALUES (?, ?, ?, ?, ?, ?)",
-                    ('luke', '1234', 'luke@desk.com', 'Luke Haliburton', '447', 1)
+        cur.execute("INSERT INTO users (username, passwd, email, name, status) VALUES (?, ?, ?, ?, ?)",
+                    ('luke', '1234', 'luke.haliburton@ifi.lmu.de', 'Luke Haliburton', 1)
+                    )
+        userid = cur.lastrowid
+
+        cur.execute("INSERT INTO desks (macaddress, location) VALUES (?, ?)",
+                    ('84:d8:1b:47:07:7e', '441 right')
                     )
 
-        cur.execute("INSERT INTO desks (macaddress, userid) VALUES (?, ?)",
-                    ('00-14-22-04-25-37', cur.lastrowid)
+        cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (?, ?)",
+                    (cur.lastrowid, userid)
                     )
 
-        cur.execute("INSERT INTO users (username, passwd, email, name, room, status) VALUES (?, ?, ?, ?, ?, ?)",
-                    ('robin', '1234', 'robin@desk.com',  'Robin Welsch', '447', 1)
+        cur.execute("INSERT INTO users (username, passwd, email, name, status) VALUES (?, ?, ?, ?, ?)",
+                    ('robin', '1234', 'robin.welsch@ifi.lmu.de',  'Robin Welsch', 1)
                     )
 
-        cur.execute("INSERT INTO desks (macaddress, userid) VALUES (?, ?)",
-                    ('AA-14-22-04-25-37', cur.lastrowid)
+        userid = cur.lastrowid
+
+        cur.execute("INSERT INTO desks (macaddress, location) VALUES (?, ?)",
+                    ('AA-14-22-04-25-37', '441 left')
+                    )
+                    
+        cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (?, ?)",
+                    (cur.lastrowid, userid)
                     )
         
 

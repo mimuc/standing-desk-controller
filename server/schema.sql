@@ -8,9 +8,7 @@ CREATE TABLE users (
     passwd TEXT NOT NULL,
     email TEXT NOT NULL,
     name TEXT NOT NULL,
-    room TEXT NOT NULL,
-    status INTEGER NOT NULL,
-    desksid INTEGER
+    status INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS desks;
@@ -18,13 +16,33 @@ CREATE TABLE desks (
     deskid INTEGER PRIMARY KEY AUTOINCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     macaddress TEXT NOT NULL,
+    location TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS heights;
+CREATE TABLE heights (
+    heightid INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time INTEGER NOT NULL,
+    userid INTEGER NOT NULL,
+    height REAL NOT NULL
+);
+
+DROP TABLE IF EXISTS actions;
+CREATE TABLE actions (
+    actionid INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time INTEGER NOT NULL,
+    userid INTEGER NOT NULL,
+    action TEXT NOT NULL -- manual keypresses, interface actions, and automatic actions
+);
+
+DROP TABLE IF EXISTS deskjoins;
+CREATE TABLE deskjoins (
+    deskjoinid INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end TIMESTAMP,
+    deskid INTEGER NOT NULL,
     userid INTEGER NOT NULL
 );
 
-DROP TABLE IF EXISTS hights;
-CREATE TABLE hights (
-    hightid INTEGER PRIMARY KEY AUTOINCREMENT,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    userid INTEGER NOT NULL,
-    hight REAL NOT NULL
-);
