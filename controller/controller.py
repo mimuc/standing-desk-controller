@@ -88,6 +88,22 @@ print("mac address: ", mac)
 
 
 
+def execute_command(newCommand):
+    print('New command: ', newCommand)
+    if (newCommand >=4):
+        # simulate a button press (1 through 4)
+        if(newCommand == 1):
+            d0.value(1)
+            d1.value(1)
+            time.sleep(1)
+            d0.value(0)
+            d1.value(0)
+        
+    else:
+        # go to a specific height and then stop
+        
+    
+
 
 def post_request(req_data):
 #     try:
@@ -97,13 +113,7 @@ def post_request(req_data):
     r = requests.post(serverUrl_post, json=req_data, headers=header)
     print(r.json())
     r.close()
-#     except Exception as e:
-#         global buffer
-#         buffer.append(req_data)
-#         print("T Done with error", e)
-#         time.sleep(1)
-#         isDoneThread = True
-#         _thread.exit()
+
 
 
 def get_request(req_data):
@@ -112,9 +122,11 @@ def get_request(req_data):
     #print(_thread.get_ident())
     header = {'Content-Type': 'application/json; charset=utf-8'}
     r = requests.get(serverUrl_get, json=req_data, headers=header)
-    print("returned: ", r)
-    print('GET returned: ', r.json())
+    rJson = r.json()
+    print('GET returned: ', rJson)
     r.close()
+    if (rJson['status'] == 'success'):
+        execute_command(rJson['command'])
 
         
         
@@ -183,10 +195,9 @@ while True:
       
   if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 2) ):
     get_data = {'macaddress': mac}
-    print("trying")
     
     get_request(get_data)
-    print("did it")
+
     last_time_get = time.time()
       
   if not wlan.isconnected():
