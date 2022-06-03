@@ -136,13 +136,13 @@ def commandsByIdPost():
     rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
 
     if (len(rows) == 1):
-        newCommand = conn.execute(f"SELECT * FROM heights WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
+        newCommand = conn.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
         print("new command: ", newCommand)
-        cur = conn.cursor()
-        cur.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
+        # cur = conn.cursor()
+        # cur.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
 
         conn.close()
-        return  {"status": "success", "command": newCommand}
+        return  {"status": "success", "command": newCommand['command']}
     else:
         conn.close()
         return  {"status":"error", "macaddress": data['macaddress']}
