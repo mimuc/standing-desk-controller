@@ -46,3 +46,11 @@ CREATE TABLE deskjoins (
     userid INTEGER NOT NULL
 );
 
+DROP TABLE IF EXISTS commands;
+CREATE TABLE commands (
+    commandid INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    userid INTEGER NOT NULL,
+    command REAL NOT NULL, -- any of keys 1,2,3,4 or a specific height in cm to move to
+    done INTEGER NOT NULL DEFAULT 0
+    );
