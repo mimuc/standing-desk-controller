@@ -30,7 +30,7 @@ def initdb(file, overwrite=None):
         userid = cur.lastrowid
 
         cur.execute("INSERT INTO desks (macaddress, location) VALUES (?, ?)",
-                    ('84:d8:1b:47:07:7e', '441 right')
+                    ('10:27:f5:78:28:68', '448 right')
                     )
 
         cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (?, ?)",

@@ -44,8 +44,11 @@ def connectToWifi(ssid, passwd):
 wlan = connectToWifi(ssid, passwd)
 
 # IPv4 address
-serverUrl = 'http://10.163.181.50:5000/heights/add'
-# serverUrl = 'http://127.0.0.1:5000/heights/add'
+# serverUrl_post = 'http://10.163.181.50:5000/heights/add'
+# serverUrl_get = 'http://10.163.181.50:5000/heights/'
+serverUrl_post = 'http://141.84.8.105:5000/heights/add'
+serverUrl_get = 'http://141.84.8.105:5000/commands/id'
+
 
 
 d0 = Pin(25, Pin.OUT)              #D0, up signal
@@ -71,7 +74,7 @@ uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                      
 # SSID ='Nano_RP2040_Connect_test'   # Network SSID
 # KEY  ='12345678'                 # Network key (should be 8 chars) - for real use, choose a safe one
 HOST = ''
-PORT = 80                          # 80 ist the http standard port, can also use non-privileged port e.g. 8080
+PORT = 80                          # 80 is the http standard port, can also use non-privileged port e.g. 8080
 # 
 # # Init wlan module and connect to network
 # wlan = network.WLAN(network.AP_IF)
@@ -88,10 +91,10 @@ print("mac address: ", mac)
 
 def post_request(req_data):
 #     try:
-    global serverUrl
+    global serverUrl_post
     #print(_thread.get_ident())
     header = {'Content-Type': 'application/json; charset=utf-8'}
-    r = requests.post(serverUrl, json=req_data, headers=header)
+    r = requests.post(serverUrl_post, json=req_data, headers=header)
     print(r.json())
     r.close()
 #     except Exception as e:
@@ -101,9 +104,21 @@ def post_request(req_data):
 #         time.sleep(1)
 #         isDoneThread = True
 #         _thread.exit()
-        
-        
 
+
+def get_request(req_data):
+#     try:
+    global serverUrl_get
+    #print(_thread.get_ident())
+    header = {'Content-Type': 'application/json; charset=utf-8'}
+    r = requests.get(serverUrl_get, json=req_data, headers=header)
+    print("returned: ", r)
+    print('GET returned: ', r.json())
+    r.close()
+
+        
+        
+last_time_get = time.time()
 buffer =[]
 lastHeight = -1      
 # loop to deal with  http requests
@@ -150,6 +165,7 @@ while True:
               buffer.append(post_data)
      
 
+  
   #print(a, b)          
   currentHeight = a*256+b
   if ((lastHeight != currentHeight) & (int(a) != 0) & (int(b) != 0)):
@@ -163,6 +179,15 @@ while True:
       buffer.append(post_data)
 
       lastHeight = currentHeight
+      
+      
+  if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 2) ):
+    get_data = {'macaddress': mac}
+    print("trying")
+    
+    get_request(get_data)
+    print("did it")
+    last_time_get = time.time()
       
   if not wlan.isconnected():
       wlan = connectToWifi(ssid, passwd)

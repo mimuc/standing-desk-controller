@@ -142,7 +142,7 @@ def commandsByIdPost():
         # cur.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
 
         conn.close()
-        return  {"status": "success", "command": newCommand['command']}
+        return  {"status": "success", "command": newCommand[0]['command']}
     else:
         conn.close()
         return  {"status":"error", "macaddress": data['macaddress']}
