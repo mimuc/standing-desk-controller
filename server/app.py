@@ -134,15 +134,21 @@ def commandsByIdPost():
 
     # We get the Macaddress of the desk - use this to look up the userid and see if that userid has any commands
     rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
-
+ 
     if (len(rows) == 1):
         newCommand = conn.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
-        print("new command: ", newCommand)
-        # cur = conn.cursor()
-        # cur.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
+        if(len(newCommand) >= 1):
+        
+            cur = conn.cursor()
+            cur.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
+            conn.commit()
+           
 
-        conn.close()
-        return  {"status": "success", "command": newCommand[0]['command']}
+            conn.close()
+            return  {"status": "success", "command": newCommand[0]['command']}
+        else:
+            conn.close()
+            return{"status": "success", "command": None}
     else:
         conn.close()
         return  {"status":"error", "macaddress": data['macaddress']}
@@ -189,15 +195,13 @@ def addCommandByUsername(username, command):
         conn.close()
         return  {"status":"error"}
 
+@app.route('/commands/add', methods=['POST']) 
+def addCommandPost():
+    data = request.json
+    conn = get_db_connection()
 
-    
-
-
-#@app.route('/heights/add/<string:userid>/<string:height>/<int:time>')
-#def addheight(userid, height, time):
-#    conn = get_db_connection()
-#    cur = conn.cursor()
-#    cur.execute('INSERT INTO heights (userid, height, time) VALUES(?,?,?)', (userid, height, time))
-#    conn.commit()
-#    conn.close()
-#    return  {"status":"added", "id":cur.lastrowid}
+    cur = conn.cursor()
+    cur.execute('INSERT INTO commands (userid, command, done) VALUES(?,?,?)', (data['userid'], data['command'], 0))
+    conn.commit()
+    conn.close()
+    return  {"status":"added", "id":cur.lastrowid}
