@@ -90,18 +90,41 @@ print("mac address: ", mac)
 
 def execute_command(newCommand):
     print('New command: ', newCommand)
-    if (newCommand >=4):
-        # simulate a button press (1 through 4)
-        if(newCommand == 1):
-            d0.value(1)
-            d1.value(1)
-            time.sleep(1)
-            d0.value(0)
-            d1.value(0)
-        
+    if newCommand:
+        if (newCommand <=4):
+            # simulate a button press (1 through 4)
+            if(newCommand == 1):
+                print('New command is 1! ')
+                d0.value(1)
+                d1.value(1)
+                time.sleep(1)
+                d0.value(0)
+                d1.value(0)
+            elif(newCommand == 2):
+                print('New command is 2! ')
+                d2.value(1)
+                time.sleep(1)
+                d2.value(0)
+            elif(newCommand == 3):
+                print('New command is 3! ')
+                d1.value(1)
+                d2.value(1)
+                time.sleep(1)
+                d1.value(0)
+                d2.value(0)
+            elif(newCommand == 4):
+                print('New command is 4! ')
+                d0.value(1)
+                d2.value(1)
+                time.sleep(1)
+                d0.value(0)
+                d2.value(0)
+            
+        else:
+            # go to a specific height and then stop
+            print('New command is different: ', newCommand)
     else:
-        # go to a specific height and then stop
-        
+        print('No commands')
     
 
 
