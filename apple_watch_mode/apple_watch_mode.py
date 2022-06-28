@@ -52,34 +52,17 @@ if(len(users) > 0):
 
             # If there are heights, more checks required
             if (len(heights) > 0):
-                lastTime = heights[-1]['time']
-                lastHeight = heights[-1]['height']
-                lastDate = datetime.strptime(heights[-1]['created'], '%Y-%m-%d %H:%M:%S')
-
-
-                # If there are no heights in the last (time_threshold_second) amount of time, check the height
-                if ((now - lastDate).total_seconds() > time_threshold_second):
-                    print(f'no new heights in {time_threshold_second} seconds')
-                    # if the last height is sitting, this means the user has been sitting for the whole time threshold
-                    # so send stand command
-                    if (lastHeight < standing_threshold):
-                        send_post_command(command_json)
-                        
-                    else:
-                        print('Already standing')
-                # If there are heights recorded within the time threshold, check to see if the user has stood
+                stand_flag = 0
+                # check if the user has stood this hour
+                for height in heights:
+                    if (height['height'] > standing_threshold):
+                        stand_flag = 1
+                # if no flag, the user has not stood this hour
+                if stand_flag == 0:
+                    send_post_command(command_json)
+                # if they already stood this hour, do nothing
                 else:
-                    stand_flag = 0
-                    for height in heights:
-                        if (height['height'] > standing_threshold):
-                            stand_flag = 1
-                    # if no flag, the user has not stood this hour
-                    if stand_flag == 0:
-                        send_post_command(command_json)
-                    # if they already stood this hour, do nothing
-                    else:
-                        print('User already stood this hour')
-
+                    print('User already stood this hour')
             # If there are no heights at all, send stand command  
             else:
                 print('no heights')
