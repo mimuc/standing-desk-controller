@@ -29,7 +29,7 @@ if(len(responseJson) > 0):
     # loop through each user in the database
     for user in responseJson:
         # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
-        created_time = datetime.strptime(responseJson[-1]['created'], '%Y-%m-%d %H:%M:%S')
+        created_time = datetime.strptime(responseJson[-1]['startdate'], '%Y-%m-%d %H:%M:%S')
         experiment_day = (now - created_time).days
         if (experiment_day >=7) and (experiment_day <14):
             # Create the command post request

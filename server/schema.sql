@@ -11,7 +11,8 @@ CREATE TABLE users (
     status INTEGER NOT NULL,
     standkey INTEGER NOT NULL DEFAULT 1,
     sitkey INTEGER NOT NULL DEFAULT 2,
-    condition TEXT NOT NULL -- can be R, A, or S (regular interval, apple watch, or smart)
+    condition TEXT NOT NULL, -- can be R, A, or S (regular interval, apple watch, or smart)
+    startdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- the date the user actually starts the experiment
 );
 
 DROP TABLE IF EXISTS desks;
