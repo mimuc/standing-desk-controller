@@ -24,8 +24,8 @@ def initdb(file, overwrite=None):
         cur = connection.cursor()
 
 
-        cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    ('luke', '1234', 'luke.haliburton@ifi.lmu.de', 'Luke Haliburton', 1, 1, 2)
+        cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    ('luke', '1234', 'luke.haliburton@ifi.lmu.de', 'Luke Haliburton', 1, 1, 2, 'R')
                     )
         userid = cur.lastrowid
 
@@ -37,8 +37,8 @@ def initdb(file, overwrite=None):
                     (cur.lastrowid, userid)
                     )
 
-        cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    ('robin', '1234', 'robin.welsch@ifi.lmu.de',  'Robin Welsch', 1, 2, 1)
+        cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    ('robin', '1234', 'robin.welsch@ifi.lmu.de',  'Robin Welsch', 1, 2, 1, 'A')
                     )
 
         userid = cur.lastrowid

@@ -10,7 +10,8 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     status INTEGER NOT NULL,
     standkey INTEGER NOT NULL DEFAULT 1,
-    sitkey INTEGER NOT NULL DEFAULT 2
+    sitkey INTEGER NOT NULL DEFAULT 2,
+    condition TEXT NOT NULL -- can be R, A, or S (regular interval, apple watch, or smart)
 );
 
 DROP TABLE IF EXISTS desks;

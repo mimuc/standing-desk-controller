@@ -33,6 +33,22 @@ def allUsers():
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
+@app.route('/users/condition/<string:condition>')
+def usersByCondition(condition):
+    conn = get_db_connection()
+    
+    rows = conn.execute(f"SELECT * FROM users WHERE condition = '{condition}'", ()).fetchall()
+    return json.dumps( [dict(ix) for ix in rows] )
+
+
+@app.route('/users/condition', methods=['GET'])
+def usersByConditionGet():
+    data = request.json   
+    conn = get_db_connection()
+    
+    rows = conn.execute(f"SELECT * FROM users WHERE condition = '{data['condition']}'", ()).fetchall()
+    return json.dumps( [dict(ix) for ix in rows] )
+   
 @app.route('/desks')
 def allDesks():
     conn = get_db_connection()
@@ -128,7 +144,7 @@ def addHeight(macaddress, height, time):
         return  {"status":"error"}
 
 @app.route('/commands/id', methods=['GET'])
-def commandsByIdPost():
+def commandsByIdGet():
     data = request.json   
     conn = get_db_connection()
 
