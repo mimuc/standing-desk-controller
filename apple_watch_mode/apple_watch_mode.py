@@ -42,7 +42,7 @@ if(len(responseJson) > 0):
         # if the last height is sitting, this means the user has been sitting for the whole time threshold
         # so send stand command
         if (lastHeight < standing_threshold):
-            command_json = {'command': '1', 'userid': responseJson[-1]['userid']}
+            command_json = {'command': responseJson[-1]['standkey'], 'userid': responseJson[-1]['userid']}
             print('posting')
             # response = requests.post(post_commands_url, json = command_json, headers=header)
             # print(response)
