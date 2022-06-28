@@ -1,55 +1,91 @@
-# This file is a lambda that checks for user activity in the past hour on the server and sends a STAND command to any 
-# desks where the user has not stood for at least one minute within the hour
+# This file is a lambda that checks for user activity in the past hour on the server and sends a 
+# STAND command to any desks where the user has not stood within the hour
 
 import requests
-import time
 from datetime import datetime, timedelta
-import json
 
-time_threshold = 60
-standing_threshold = 1000
+time_threshold_second = 3000 # checks for the last 50 minutes at each XX:50
+standing_threshold = 900 # above this counts as standing
 
-get_heights_url = 'http://141.84.8.105:5000/heights'
-time_filter = datetime.utcnow() - timedelta(seconds=time_threshold)
-filter = [dict(name='time', op='eq', val=1655315165000)]
-params = dict(q=json.dumps(dict(filters=filter)))
+now = (datetime.utcnow())
+time_threshold = (now - timedelta(seconds=time_threshold_second)).strftime("%Y-%m-%d %H:%M:%S")
 
+
+get_users_url = 'http://141.84.8.105:5000/users/condition'
+get_heights_url = 'http://141.84.8.105:5000/heights/id'
 post_commands_url = 'http://141.84.8.105:5000/commands/add'
 header = {'Content-Type': 'application/json; charset=utf-8'}
 
+# This lambda only cares about users in condiiton A (apple watch style)
+users_json = {'condition': 'A'}
 
 
-response = requests.get(get_heights_url, params=params, headers=header)
-responseJson = response.json()
-print(len(responseJson))
-print(responseJson[-1]['time'])
-print(time.time())
 
-if(len(responseJson) > 0):
-    lastTime = responseJson[-1]['time']
-    lastHeight = responseJson[-1]['height']
-    lastDate = datetime.strptime(responseJson[-1]['created'], '%Y-%m-%d %H:%M:%S')
+# First, fetch all users who are in the A condition (apple watch style)
+response = requests.get(get_users_url, json=users_json, headers=header) # test version with no filter
+users = response.json()
+print('Users: ', users)
 
-    now = int(1000*time.time())
-    currentTime = datetime.utcnow()
+def send_post_command(command_json):
+    print('posting')
+    response = requests.post(post_commands_url, json=command_json, headers=header)
+    print(response)
 
-    print('lastDate: ', lastDate)
-    print('currentDate: ', currentTime)
 
-    # If there are no heights in the last (time_threshold) amount of time, check the height
-    if ((currentTime - lastDate).total_seconds() > time_threshold):
-        print(f'no new heights in {time_threshold} seconds')
-        # if the last height is sitting, this means the user has been sitting for the whole time threshold
-        # so send stand command
-        if (lastHeight < standing_threshold):
-            command_json = {'command': responseJson[-1]['standkey'], 'userid': responseJson[-1]['userid']}
-            print('posting')
-            # response = requests.post(post_commands_url, json = command_json, headers=header)
-            # print(response)
+# If there are any users in this condition, keep going
+if(len(users) > 0):
+    # loop through each user in the database
+    for user in users:
+        # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
+        started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
+        experiment_day = (now - started_time).days
+        if (experiment_day >=7) and (experiment_day <14):
+            # Prep height json and command json for this user
+            heights_json = {'userid': user['userid'], 'time': str(time_threshold)}
+            command_json = {'command': user['standkey'], 'userid': user['userid']}
+
+            # get all heights for this user more recent than time_threshold
+            response = requests.get(get_heights_url, json=heights_json, headers=header)
+            heights = response.json()
+
+            
+
+            # If there are heights, more checks required
+            if (len(heights) > 0):
+                lastTime = heights[-1]['time']
+                lastHeight = heights[-1]['height']
+                lastDate = datetime.strptime(heights[-1]['created'], '%Y-%m-%d %H:%M:%S')
+
+
+                # If there are no heights in the last (time_threshold_second) amount of time, check the height
+                if ((now - lastDate).total_seconds() > time_threshold_second):
+                    print(f'no new heights in {time_threshold_second} seconds')
+                    # if the last height is sitting, this means the user has been sitting for the whole time threshold
+                    # so send stand command
+                    if (lastHeight < standing_threshold):
+                        send_post_command(command_json)
+                        
+                    else:
+                        print('Already standing')
+                # If there are heights recorded within the time threshold, check to see if the user has stood
+                else:
+                    stand_flag = 0
+                    for height in heights:
+                        if (height['height'] > standing_threshold):
+                            stand_flag = 1
+                    # if no flag, the user has not stood this hour
+                    if stand_flag == 0:
+                        send_post_command(command_json)
+                    # if they already stood this hour, do nothing
+                    else:
+                        print('User already stood this hour')
+
+            # If there are no heights at all, send stand command  
+            else:
+                print('no heights')
+                send_post_command(command_json)
+        # If they are not within the active week, do nothing
         else:
-            print('Already standing')
-    # If there are heights recorded within the time threshold, check to see if the user has stood
-    else:
-        print('Heights too recent')
+            print ("Not in active A condition, currently on day ", experiment_day)
 else:
-    print('No heights')
+    print('No users')
