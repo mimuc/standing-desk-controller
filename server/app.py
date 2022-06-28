@@ -45,8 +45,8 @@ def usersByCondition(condition):
 def usersByConditionGet():
     data = request.json   
     conn = get_db_connection()
-    
     rows = conn.execute(f"SELECT * FROM users WHERE condition = '{data['condition']}'", ()).fetchall()
+    conn.close()
     return json.dumps( [dict(ix) for ix in rows] )
    
 @app.route('/desks')
@@ -84,6 +84,19 @@ def heightsById(userid):
     rows = conn.execute(f"SELECT * FROM heights WHERE userid = {userid}", ()).fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
+
+@app.route('/heights/id', methods=['GET'])
+def heightsByIdGet():
+    data = request.json   
+    conn = get_db_connection()
+    if ('time' in data):
+        rows = conn.execute(f"SELECT * FROM heights WHERE (userid = {data['userid']}) AND (created > '{data['time']}')", ()).fetchall()
+        conn.close()
+    else:
+        rows = conn.execute(f"SELECT * FROM heights WHERE userid = {data['userid']}", ()).fetchall()
+        conn.close()
+    return  json.dumps( [dict(ix) for ix in rows] )
+
 
     
 @app.route('/heights/u/<string:username>')
