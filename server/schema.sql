@@ -8,7 +8,9 @@ CREATE TABLE users (
     passwd TEXT NOT NULL,
     email TEXT NOT NULL,
     name TEXT NOT NULL,
-    status INTEGER NOT NULL
+    status INTEGER NOT NULL,
+    standkey INTEGER NOT NULL DEFAULT 1,
+    sitkey INTEGER NOT NULL DEFAULT 2
 );
 
 DROP TABLE IF EXISTS desks;
