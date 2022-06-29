@@ -1,6 +1,11 @@
 import sqlite3
 import json
 from flask import Flask, request
+from flask_apscheduler import APScheduler
+import modes.regular_interval_mode as regular_interval_mode
+import modes.apple_watch_mode as apple_watch_mode
+from datetime import datetime
+
 
 DATABASE_FILE = "database.db"
 
@@ -16,6 +21,25 @@ app.config.from_mapping(config)
 
 import init_db
 init_db.initdb(DATABASE_FILE)
+
+
+
+def condition_R():
+    with app.app_context():
+        print('Running R condition')
+        regular_interval_mode.run()
+
+def condition_A():
+    with app.app_context():
+        print('running A condition')
+        apple_watch_mode.run()
+
+
+scheduler = APScheduler()
+scheduler.add_job(func=condition_R, trigger='cron', id='job1', minute=50)
+scheduler.add_job(func=condition_A, trigger='cron', id='job2', minute=50)
+scheduler.start()
+
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_FILE)
@@ -234,3 +258,9 @@ def addCommandPost():
     conn.commit()
     conn.close()
     return  {"status":"added", "id":cur.lastrowid}
+
+
+
+
+
+    
