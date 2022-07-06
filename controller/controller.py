@@ -112,9 +112,13 @@ def execute_command(newCommand):
 def post_request(req_data):
     global serverUrl_post
     header = {'Content-Type': 'application/json; charset=utf-8'}
-    r = requests.post(serverUrl_post, json=req_data, headers=header)
-    print(r.json())
-    r.close()
+    try:
+        r = requests.post(serverUrl_post, json=req_data, headers=header)
+        print(r.json())
+        r.close()
+    except GetException:
+        print('GET exception: ', GetException)
+    
 
 
 # This function fetches a request from the server. The request "req_data"
@@ -122,13 +126,17 @@ def post_request(req_data):
 def get_request(req_data):
     global serverUrl_get
     header = {'Content-Type': 'application/json; charset=utf-8'}
-    r = requests.get(serverUrl_get, json=req_data, headers=header)
-    rJson = r.json()
-    print('GET returned: ', rJson)
-    r.close()
-    if (rJson['status'] == 'success'):
-        # if there is a command, execute it
-        execute_command(rJson['command'])
+    try:
+        r = requests.get(serverUrl_get, json=req_data, headers=header)
+        rJson = r.json()
+        print('GET returned: ', rJson)
+        r.close()
+        if (rJson['status'] == 'success'):
+            # if there is a command, execute it
+            execute_command(rJson['command'])
+    except GetException:
+        print('GET exception: ', GetException)
+    
 
         
 
@@ -148,14 +156,14 @@ while True:
     # This loop reads in the bytes
     for x in Rx:
         if (x == 1 and flag1 == 0):
-        flag1=1
-    elif (x == 1 and flag1 == 1):
-        flag2=1
-    elif (flag1 == 1 and flag2 == 1 and a==0):
-        a=x
-    elif (flag1 == 1 and flag2 ==1 and flag3 == 0):
-        b=x
-        flag3=1
+            flag1=1
+        elif (x == 1 and flag1 == 1):
+            flag2=1
+        elif (flag1 == 1 and flag2 == 1 and a==0):
+            a=x
+        elif (flag1 == 1 and flag2 ==1 and flag3 == 0):
+            b=x
+            flag3=1
     Rx=bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00')
       
 
@@ -205,5 +213,7 @@ while True:
     # in case the wifi disconnects, try reconnecting
     if not wlan.isconnected():
         wlan = connectToWifi(ssid, passwd)
+
+
 
 
