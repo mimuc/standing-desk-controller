@@ -29,7 +29,7 @@ def trigger_standing():
 
 
 scheduler = APScheduler()
-scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=15)
+scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=40)
 scheduler.start()
 
 
@@ -215,7 +215,7 @@ def commandsByIdGet():
 
     # We get the Macaddress of the desk - use this to look up the userid and see if that userid has any commands
     rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
- 
+    
     if (len(rows) == 1):
         newCommand = conn.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
         if(len(newCommand) >= 1):
