@@ -11,30 +11,23 @@ namespace keymousespeed01
 {
     class postToServer
     {
-        private static string serverUrl_post = "http://141.84.8.105:5000/commands/add";
+        private static string serverUrl_post = "http://141.84.8.105:5000/smart/add";
         private static readonly HttpClient client = new HttpClient();
 
 
-        private static int standCommand = 1;
-        private static int userID = 1;
+        private static string username = "luke";
         
         
 
        
         public static async void run()
         {
-            var values = new Dictionary<string, string>
-            {
-                { "command", "1" },
-                { "userid", "1" }
-            };
 
-
-            var content = new FormUrlEncodedContent(values);
-
-          
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, serverUrl_post);
-            request.Content = new StringContent($"{{\"command\": {standCommand},\"userid\":{userID}}}",
+
+            Console.WriteLine("Request: {0}", request);
+
+            request.Content = new StringContent($"{{\"username\": \"{username}\"}}",
                                                 Encoding.UTF8,
                                                 "application/json");//CONTENT-TYPE header
 

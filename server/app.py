@@ -4,8 +4,7 @@ from flask import Flask, request
 from flask_apscheduler import APScheduler
 import modes.trigger_standing_all_modes as trigger_standing_all_modes
 
-
-
+standing_threshold = 900
 DATABASE_FILE = "database.db"
 
 config = {
@@ -118,9 +117,14 @@ def addDeskjoin(username, location):
             cur = conn.cursor()
             cur.execute('INSERT INTO deskjoins (userid, deskid) VALUES(?,?)', (rows1[0]['userid'], rows2[0]['deskid']))
             conn.commit()
-    conn.close()
-
-    return  {"status":"added", "id":cur.lastrowid}
+            conn.close()
+            return  {"status":"added", "id":cur.lastrowid}
+        else:
+            conn.close()
+            return {"status":"error", "reason": "could not find desk", "location": location}
+    else:
+        conn.close()
+        return {"status":"error", "reason": "could not find user", "username": username}
 
 @app.route('/commands')
 def allCommands():
@@ -215,7 +219,7 @@ def commandsByIdGet():
 
     # We get the Macaddress of the desk - use this to look up the userid and see if that userid has any commands
     rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
-    
+
     if (len(rows) == 1):
         newCommand = conn.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
         if(len(newCommand) >= 1):
@@ -287,6 +291,37 @@ def addCommandPost():
     conn.close()
     return  {"status":"added", "id":cur.lastrowid}
 
+@app.route('/smart/add', methods=['POST']) 
+def addSmartCommand():
+    data = request.json
+    conn = get_db_connection()
+    rows1 = conn.execute(f"SELECT * FROM users WHERE username = '{data['username']}'").fetchall()
+    if len(rows1) > 0:
+        rows2 = conn.execute(f"SELECT * FROM heights WHERE userid = '{rows1[0]['userid']}'").fetchall()
+        if len(rows2) > 0:
+            print('there are heights')
+            print(rows2[-1]['height'])
+            if rows2[-1]['height'] > standing_threshold:
+                print('user is already standing, no command')
+                return {"status":"not added", "reason": "user already standing"}
+            else:
+                print('user is sitting, do command')
+                cur = conn.cursor()
+                cur.execute('INSERT INTO commands (userid, command, done) VALUES(?,?,?)', (rows1[0]['userid'], rows1[0]['standkey'], 0))
+                conn.commit()
+                conn.close()
+                return {"status":"added", "id":cur.lastrowid}
+        else:
+            print('there are no heights, do command')
+            cur = conn.cursor()
+            cur.execute('INSERT INTO commands (userid, command, done) VALUES(?,?,?)', (rows1[0]['userid'], rows1[0]['standkey'], 0))
+            conn.commit()
+            conn.close()
+            return {"status":"added", "id":cur.lastrowid}
+    else:
+        conn.close()
+        return {"status":"error", "reason": "could not find user", "username": data['username']}
+    
 
 
 

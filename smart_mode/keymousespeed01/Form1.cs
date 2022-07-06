@@ -188,7 +188,7 @@ namespace keymousespeed01
         {
             checkKBandWin.checkNewKB(KeyboardTypeLabel, KeyboardLayoutLabel);
             checkKBandWin.checkNewWin(ActiveWinLabel, CheckBoxWinPlainText);
-            if (timeFormat.checkDiff() > 10000 && timeFormat.checkDiff() < 14500)
+            if (timeFormat.checkDiff() > 60000 && timeFormat.checkDiff() < 64500)
             {
                 postToServer.run();
             }
