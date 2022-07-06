@@ -116,8 +116,11 @@ def post_request(req_data):
         r = requests.post(serverUrl_post, json=req_data, headers=header)
         print(r.json())
         r.close()
-    except GetException:
-        print('GET exception: ', GetException)
+    except Exception as PostException:
+        print('GET exception: ', PostException)
+        # in case the wifi disconnects, try reconnecting
+        if not wlan.isconnected():
+            wlan = connectToWifi(ssid, passwd)
     
 
 
@@ -134,8 +137,11 @@ def get_request(req_data):
         if (rJson['status'] == 'success'):
             # if there is a command, execute it
             execute_command(rJson['command'])
-    except GetException:
+    except Exception as GetException:
         print('GET exception: ', GetException)
+        # in case the wifi disconnects, try reconnecting
+        if not wlan.isconnected():
+            wlan = connectToWifi(ssid, passwd)
     
 
         
@@ -213,7 +219,3 @@ while True:
     # in case the wifi disconnects, try reconnecting
     if not wlan.isconnected():
         wlan = connectToWifi(ssid, passwd)
-
-
-
-
