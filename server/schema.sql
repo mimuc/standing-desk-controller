@@ -8,7 +8,7 @@ CREATE TABLE users (
     passwd TEXT NOT NULL,
     email TEXT NOT NULL,
     name TEXT NOT NULL,
-    status INTEGER NOT NULL,
+    status INTEGER NOT NULL DEFAULT 1,
     standkey INTEGER NOT NULL DEFAULT 1,
     sitkey INTEGER NOT NULL DEFAULT 2,
     condition TEXT NOT NULL, -- can be R, A, or S (regular interval, apple watch, or smart)

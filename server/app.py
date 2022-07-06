@@ -2,9 +2,8 @@ import sqlite3
 import json
 from flask import Flask, request
 from flask_apscheduler import APScheduler
-import modes.regular_interval_mode as regular_interval_mode
-import modes.apple_watch_mode as apple_watch_mode
-from datetime import datetime
+import modes.trigger_standing_all_modes as trigger_standing_all_modes
+
 
 
 DATABASE_FILE = "database.db"
@@ -23,21 +22,14 @@ import init_db
 init_db.initdb(DATABASE_FILE)
 
 
-
-def condition_R():
+def trigger_standing():
     with app.app_context():
-        print('Running R condition')
-        regular_interval_mode.run()
-
-def condition_A():
-    with app.app_context():
-        print('running A condition')
-        apple_watch_mode.run()
+        print('running all conditions')
+        trigger_standing_all_modes.run()
 
 
 scheduler = APScheduler()
-scheduler.add_job(func=condition_R, trigger='cron', id='job1', minute=50)
-scheduler.add_job(func=condition_A, trigger='cron', id='job2', minute=50)
+scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=15)
 scheduler.start()
 
 
@@ -56,6 +48,17 @@ def allUsers():
     rows = conn.execute('SELECT * FROM users').fetchall() #userid, email
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
+
+@app.route('/users/add/<string:username>/<string:passwd>/<string:email>/<string:name>/<int:status>/<int:standkey>/<int:sitkey>/<string:condition>/<string:startdate>')
+def addUser(username, passwd, email, name, status, standkey, sitkey, condition, startdate):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition, startdate) VALUES(?,?,?,?,?,?,?,?,?)', (username, passwd, email, name, status, standkey, sitkey, condition, startdate))
+    conn.commit()
+    conn.close()
+
+    return  {"status":"added", "id":cur.lastrowid}
+   
 
 @app.route('/users/condition/<string:condition>')
 def usersByCondition(condition):
@@ -80,6 +83,16 @@ def allDesks():
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
+@app.route('/desks/add/<string:macaddress>/<string:location>')
+def addDesk(macaddress, location):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('INSERT INTO desks (macaddress, location) VALUES(?,?)', (macaddress, location))
+    conn.commit()
+    conn.close()
+
+    return  {"status":"added", "id":cur.lastrowid}
+
 @app.route('/heights')
 def allHeights():
     conn = get_db_connection()
@@ -93,6 +106,21 @@ def allDeskjoins():
     rows = conn.execute('SELECT * FROM deskjoins').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
+
+@app.route('/deskjoins/add/<string:username>/<string:location>')
+def addDeskjoin(username, location):
+    conn = get_db_connection()
+    rows1 = conn.execute(f"SELECT * FROM users WHERE username = '{username}'", ()).fetchall()
+    print(rows1)
+    if len(rows1) > 0:
+        rows2 = conn.execute(f"SELECT * FROM desks WHERE location = '{location}'", ()).fetchall()
+        if len(rows2) > 0:
+            cur = conn.cursor()
+            cur.execute('INSERT INTO deskjoins (userid, deskid) VALUES(?,?)', (rows1[0]['userid'], rows2[0]['deskid']))
+            conn.commit()
+    conn.close()
+
+    return  {"status":"added", "id":cur.lastrowid}
 
 @app.route('/commands')
 def allCommands():
