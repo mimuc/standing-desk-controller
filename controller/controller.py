@@ -1,30 +1,22 @@
-# Wi-Fi AP Mode Example
-#
-# This example shows how to use Wi-Fi in Access Point mode.
-# this version by Albrecht Schmidt, https://www.sketching-with-hardware.org/wiki/
-# based on the following examples:
-# https://randomnerdtutorials.com/esp32-esp8266-micropython-web-server/
-# https://docs.arduino.cc/tutorials/nano-rp2040-connect/rp2040-python-api
-
+# This code operates an Arduino Nano RP2040 connected to a custom
+# Circuit board to control a standing desk based on commands sent
+# to a central server.
+# Created by Luke Haliburton, Sven Mayer, and Albrecht Schmidt
+# At LMU Munich, 2022
 
 import network, socket, time
 from machine import UART, Pin
 import ubinascii
-
 import urequests as requests
 import json
-# from netvars import setNetVar, getNetVar, initNet
-import _thread
 
 
-# For threading
-# S = Semaphore(16)
 
-
+# Hard coded wifi name and password
 ssid = "HCUM"
 passwd = "wearedoingresearch."
 
-# # assuming there is a network with ssid hotspot1 and password 123456789
+# assuming there is a network with ssid and passwd
 # connect to wifi
 def connectToWifi(ssid, passwd):
     try:
@@ -44,13 +36,12 @@ def connectToWifi(ssid, passwd):
 wlan = connectToWifi(ssid, passwd)
 
 # IPv4 address
-# serverUrl_post = 'http://10.163.181.50:5000/heights/add'
-# serverUrl_get = 'http://10.163.181.50:5000/heights/'
+# Change this based on the address of the server
 serverUrl_post = 'http://141.84.8.105:5000/heights/add'
 serverUrl_get = 'http://141.84.8.105:5000/commands/id'
 
 
-
+# These pins correspond with the custom PCB to control the desk
 d0 = Pin(25, Pin.OUT)              #D0, up signal
 d1 = Pin(15, Pin.OUT)              #D1, down signal
 d2 = Pin(16, Pin.OUT)              #D2, preset 2 signal
@@ -66,164 +57,153 @@ d2.value(0)
 d3.value(0)
 
 
-
+# init UART pin with given baudrate to read the height of the desk
 Rx = bytearray(8)
-uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                         # init with given baudrate
+uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)                         
 
-
-# SSID ='Nano_RP2040_Connect_test'   # Network SSID
-# KEY  ='12345678'                 # Network key (should be 8 chars) - for real use, choose a safe one
-HOST = ''
-PORT = 80                          # 80 is the http standard port, can also use non-privileged port e.g. 8080
-# 
-# # Init wlan module and connect to network
-# wlan = network.WLAN(network.AP_IF)
-# wlan.active(True)
-# # it seems in this version the AP mode only supports WEP
-# wlan.config(essid=SSID, key=KEY, security=wlan.WEP, channel=2)
-
-# print("AP mode started. SSID: {} IP: {}".format(SSID, wlan.ifconfig()[0]))
+# print MacAddress so the device can be identified (for initial setup only)
 mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
 print("mac address: ", mac)
 
 
-
+# This function interprets a command fetched from the server and activates the
+# indicated button. For now, this only works with buttons 1-4, the preset height buttons
 def execute_command(newCommand):
     print('New command: ', newCommand)
     if newCommand:
         if (newCommand <=4):
             # simulate a button press (1 through 4)
             if(newCommand == 1):
-                print('New command is 1! ')
+                print('Virtually pressed button 1')
                 d0.value(1)
                 d1.value(1)
-                time.sleep(1)
+                time.sleep(2)
                 d0.value(0)
                 d1.value(0)
             elif(newCommand == 2):
-                print('New command is 2! ')
+                print('Virtually pressed button 2')
                 d2.value(1)
-                time.sleep(1)
+                time.sleep(2)
                 d2.value(0)
             elif(newCommand == 3):
-                print('New command is 3! ')
+                print('Virtually pressed button 3')
                 d1.value(1)
                 d2.value(1)
-                time.sleep(1)
+                time.sleep(2)
                 d1.value(0)
                 d2.value(0)
             elif(newCommand == 4):
-                print('New command is 4! ')
+                print('Virtually pressed button 4')
                 d0.value(1)
                 d2.value(1)
-                time.sleep(1)
+                time.sleep(2)
                 d0.value(0)
                 d2.value(0)
             
         else:
             # go to a specific height and then stop
-            print('New command is different: ', newCommand)
+            print('New command is not a preset: ', newCommand)
     else:
         print('No commands')
     
 
-
+# This function posts a request to the server. The request "req_data"
+# should be in json format
 def post_request(req_data):
-#     try:
     global serverUrl_post
-    #print(_thread.get_ident())
     header = {'Content-Type': 'application/json; charset=utf-8'}
     r = requests.post(serverUrl_post, json=req_data, headers=header)
     print(r.json())
     r.close()
 
 
-
+# This function fetches a request from the server. The request "req_data"
+# should be in json format
 def get_request(req_data):
-#     try:
     global serverUrl_get
-    #print(_thread.get_ident())
     header = {'Content-Type': 'application/json; charset=utf-8'}
     r = requests.get(serverUrl_get, json=req_data, headers=header)
     rJson = r.json()
     print('GET returned: ', rJson)
     r.close()
     if (rJson['status'] == 'success'):
+        # if there is a command, execute it
         execute_command(rJson['command'])
 
         
-        
+
 last_time_get = time.time()
 buffer =[]
-lastHeight = -1      
-# loop to deal with  http requests
+lastHeight = -1
+
+# main loop to deal with  http requests
 while True:
-  #for i in range(0,100):
-  uart.readinto(Rx)         # read all available characters
-  flag1=0
-  flag2=0
-  flag3=0
-  a=0
-  b=0
-  for x in Rx:
-    if (x == 1 and flag1 == 0):
-      flag1=1
+    # read all available characters
+    uart.readinto(Rx)         
+    flag1=0
+    flag2=0
+    flag3=0
+    a=0
+    b=0
+    # This loop reads in the bytes
+    for x in Rx:
+        if (x == 1 and flag1 == 0):
+        flag1=1
     elif (x == 1 and flag1 == 1):
-      flag2=1
+        flag2=1
     elif (flag1 == 1 and flag2 == 1 and a==0):
-      a=x
+        a=x
     elif (flag1 == 1 and flag2 ==1 and flag3 == 0):
-      b=x
-      flag3=1
-  Rx=bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00')
+        b=x
+        flag3=1
+    Rx=bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00')
       
-  #print(int(a), int(b), len(buffer))
-  # Start sending when idle
-  if ((int(a) == 0) & (int(b)==0) & (len(buffer) > 1) & (wlan.isconnected())):
-      lstHeight = []
-      lstTime = []
-      for e in buffer:
-          lstHeight.append(e["height"])
-          lstTime.append(e["time"])
-      if (len(lstHeight) > 0):
-          #print(a, b, len(buffer))
-          post_data = {'macaddress': mac,
+
+    # Start sending when idle
+    if ((int(a) == 0) & (int(b)==0) & (len(buffer) > 1) & (wlan.isconnected())):
+        lstHeight = []
+        lstTime = []
+        for e in buffer:
+            lstHeight.append(e["height"])
+            lstTime.append(e["time"])
+        if (len(lstHeight) > 0):
+            post_data = {'macaddress': mac,
                         'heights': lstHeight,
                         'times': lstTime
                         }
-          try:
-              post_request(post_data)
-              buffer = []
-          except Exception as e:
-              print("Exception", str(e))
-              time.sleep(0.1)
-              buffer.append(post_data)
+            try:
+                # try posting the height to the server
+                post_request(post_data)
+                buffer = []
+            except Exception as e:
+                print("Exception", str(e))
+                time.sleep(0.1)
+                buffer.append(post_data)
      
 
   
-  #print(a, b)          
-  currentHeight = a*256+b
-  if ((lastHeight != currentHeight) & (int(a) != 0) & (int(b) != 0)):
-          
-      print("height:", currentHeight)
-      post_data = {'macaddress': mac,
+    # convert bytes into a height in cm
+    currentHeight = a*256+b
+    # if the height has changed, append it to the buffer
+    if ((lastHeight != currentHeight) & (int(a) != 0) & (int(b) != 0)):
+        print("height:", currentHeight)
+        post_data = {'macaddress': mac,
                     'height': currentHeight,
                     'time': int(1000*time.time())
                     }
-      
-      buffer.append(post_data)
 
-      lastHeight = currentHeight
+        buffer.append(post_data)
+
+        lastHeight = currentHeight
       
-      
-  if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 2) ):
-    get_data = {'macaddress': mac}
+    # if the desk is not moving, look for commands on the server
+    if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 3) ):
+        get_data = {'macaddress': mac}
+        get_request(get_data)
+        last_time_get = time.time()
     
-    get_request(get_data)
-
-    last_time_get = time.time()
-      
-  if not wlan.isconnected():
-      wlan = connectToWifi(ssid, passwd)
+    # in case the wifi disconnects, try reconnecting
+    if not wlan.isconnected():
+        wlan = connectToWifi(ssid, passwd)
 
 
