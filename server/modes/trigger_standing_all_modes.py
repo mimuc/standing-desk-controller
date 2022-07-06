@@ -71,7 +71,10 @@ def run():
         # loop through each user in the database
         for user in users:
             # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
-            started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
+            if len(user['startdate']) == 10:
+                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d')
+            else:
+                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
             experiment_day = (now - started_time).days
             if (experiment_day >=7) and (experiment_day <14):
                 # Prep height json and command json for this user
