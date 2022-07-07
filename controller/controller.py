@@ -111,6 +111,7 @@ def execute_command(newCommand):
 # should be in json format
 def post_request(req_data):
     global serverUrl_post
+    global wlan
     header = {'Content-Type': 'application/json; charset=utf-8'}
     try:
         r = requests.post(serverUrl_post, json=req_data, headers=header)
@@ -128,6 +129,7 @@ def post_request(req_data):
 # should be in json format
 def get_request(req_data):
     global serverUrl_get
+    global wlan
     header = {'Content-Type': 'application/json; charset=utf-8'}
     try:
         r = requests.get(serverUrl_get, json=req_data, headers=header)
@@ -211,7 +213,7 @@ while True:
         lastHeight = currentHeight
       
     # if the desk is not moving, look for commands on the server
-    if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 3) ):
+    if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 5) ):
         get_data = {'macaddress': mac}
         get_request(get_data)
         last_time_get = time.time()
@@ -219,3 +221,4 @@ while True:
     # in case the wifi disconnects, try reconnecting
     if not wlan.isconnected():
         wlan = connectToWifi(ssid, passwd)
+
