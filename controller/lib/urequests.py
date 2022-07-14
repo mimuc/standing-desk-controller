@@ -81,17 +81,13 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         host, port = host.split(":", 1)
         port = int(port)
 
-    #print(host, port)
-    #ai = usocket.getaddrinfo(host, port)
-   #print(ai)
-    #ai = ai[0]
-#     s = usocket.socket(ai[0], ai[1], ai[2])
     
     s = usocket.socket()
+
     
     #try:
     s.connect(usocket.getaddrinfo(host, port)[0][-1])
-#     print(s)
+
     if port == 443:
         s = ussl.wrap_socket(s, server_hostname=host)
     s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
@@ -138,5 +134,6 @@ def patch(url, **kw):
 
 def delete(url, **kw):
     return request("DELETE", url, **kw)
+
 
 
