@@ -16,6 +16,7 @@ import json
 ssid = "HCUM"
 passwd = "wearedoingresearch."
 
+
 # assuming there is a network with ssid and passwd
 # connect to wifi
 def connectToWifi(ssid, passwd):
@@ -37,8 +38,8 @@ wlan = connectToWifi(ssid, passwd)
 
 # IPv4 address
 # Change this based on the address of the server
-serverUrl_post = 'http://141.84.8.105:5000/heights/add'
-serverUrl_get = 'http://141.84.8.105:5000/commands/id'
+serverUrl_post = 'http://desks.medien.ifi.lmu.de/heights/add'
+serverUrl_get = 'http://desks.medien.ifi.lmu.de/commands/id'
 
 
 # These pins correspond with the custom PCB to control the desk
@@ -63,6 +64,7 @@ uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1)
 
 # print MacAddress so the device can be identified (for initial setup only)
 mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+mac = '10:27:f5:78:28:a4'
 print("mac address: ", mac)
 
 
@@ -115,13 +117,16 @@ def post_request(req_data):
     header = {'Content-Type': 'application/json; charset=utf-8'}
     try:
         r = requests.post(serverUrl_post, json=req_data, headers=header)
-        print(r.json())
+        
+        rJson = r.json()
         r.close()
+        return True
     except Exception as PostException:
-        print('GET exception: ', PostException)
+        print('POST exception: ', PostException)
         # in case the wifi disconnects, try reconnecting
         if not wlan.isconnected():
             wlan = connectToWifi(ssid, passwd)
+        return False
     
 
 
@@ -134,7 +139,6 @@ def get_request(req_data):
     try:
         r = requests.get(serverUrl_get, json=req_data, headers=header)
         rJson = r.json()
-        print('GET returned: ', rJson)
         r.close()
         if (rJson['status'] == 'success'):
             # if there is a command, execute it
@@ -181,20 +185,21 @@ while True:
         lstTime = []
         for e in buffer:
             lstHeight.append(e["height"])
-            lstTime.append(e["time"])
+            lstTime.append(e["heighttime"])
         if (len(lstHeight) > 0):
-            post_data = {'macaddress': mac,
-                        'heights': lstHeight,
-                        'times': lstTime
+            post_data = {"macaddress": mac,
+                        "heights": lstHeight,
+                        "heighttimes": lstTime
                         }
+            
             try:
                 # try posting the height to the server
-                post_request(post_data)
-                buffer = []
+                r = post_request(post_data)
+                if r:
+                    buffer = []
             except Exception as e:
-                print("Exception", str(e))
+                print("Exception - ", str(e))
                 time.sleep(0.1)
-                buffer.append(post_data)
      
 
   
@@ -202,19 +207,17 @@ while True:
     currentHeight = a*256+b
     # if the height has changed, append it to the buffer
     if ((lastHeight != currentHeight) & (int(a) != 0) & (int(b) != 0)):
-        print("height:", currentHeight)
-        post_data = {'macaddress': mac,
-                    'height': currentHeight,
-                    'time': int(1000*time.time())
+        post_data = {"macaddress": mac,
+                    "height": currentHeight,
+                    "heighttime": int(time.time())
                     }
-
         buffer.append(post_data)
 
         lastHeight = currentHeight
       
     # if the desk is not moving, look for commands on the server
     if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 5) ):
-        get_data = {'macaddress': mac}
+        get_data = {"macaddress": mac}
         get_request(get_data)
         last_time_get = time.time()
     
