@@ -1,25 +1,42 @@
-import sqlite3
+import sys,os  
+sys.path.append(os.getcwd())
+
+# import sqlite3
 import json
 from flask import Flask, request
 from flask_apscheduler import APScheduler
-import trigger_standing_all_modes as trigger_standing_all_modes
+import trigger_standing_all_modes
+import mysql.connector
 
 standing_threshold = 900
-DATABASE_FILE = "database.db"
+# DATABASE_FILE = "database.db"
+
 
 config = {
-    "DEBUG": True,  # run app in debug mode
-    "SECRET_KEY" : 'your secret key'
+    "user": 'desks',
+    "password": 'N.bc5.bCDK2R',
+    "database": 'desks',
+    "host": 'localhost',
+    "port": '3306',
 }
+
+
 
 
 app = Flask(__name__)
 app.config.from_mapping(config)
 
+# Initialize the DB
+conn = mysql.connector.connect(**config)
+cursor = conn.cursor()
+# cursor.execute("DROP TABLE IF EXISTS commands")
+# cursor.execute("CREATE TABLE commands (commandid INT(11) PRIMARY KEY AUTO_INCREMENT, userid INT(11))") 
+# conn.commit()
+import init_db_server
+init_db_server.initdb(conn)
 
-import init_db
-init_db.initdb(DATABASE_FILE)
 
+# mysql.init_app(app)
 
 def trigger_standing():
     with app.app_context():
@@ -28,31 +45,41 @@ def trigger_standing():
 
 
 scheduler = APScheduler()
-scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=40)
+scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=22)
 scheduler.start()
 
-
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE_FILE)
-    conn.row_factory = sqlite3.Row
+    conn = mysql.connector.connect(**config)
     return conn
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return {"status":"running"}
+    return '''<h1 style='color:#00883A'>Welcome to LMU Standing Desks!</h1>
+    <p>This project is created and operated by Luke Haliburton, Prof. Dr. Sven Mayer, and Prof. Dr. Albrecht Schmidt from LMU Munich</p>'''
+
+
 
 @app.route('/users')
 def allUsers():
-    conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM users').fetchall() #userid, email
-    conn.close()
-    return  json.dumps( [dict(ix) for ix in rows] )
+    try:
+        conn = mysql.connector.connect(**config)
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT * FROM `users`") #userid, email
+        # rows = cur.fetchall()
+        conn.close()
 
-@app.route('/users/add/<string:username>/<string:passwd>/<string:email>/<string:name>/<int:status>/<int:standkey>/<int:sitkey>/<string:condition>/<string:startdate>')
-def addUser(username, passwd, email, name, status, standkey, sitkey, condition, startdate):
+        return  json.dumps( [row for row in cur] )
+        
+        # return {"Something went right": cursor}
+    except mysql.connector.Error as err:
+        return {"Something went wrong": err}
+
+@app.route('/users/add/<string:username>/<string:passwd>/<string:email>/<string:name>/<int:active>/<int:standkey>/<int:sitkey>/<string:condition>/<string:startdate>')
+def addUser(username, passwd, email, name, active, standkey, sitkey, condition, startdate):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition, startdate) VALUES(?,?,?,?,?,?,?,?,?)', (username, passwd, email, name, status, standkey, sitkey, condition, startdate))
+    cur.execute('INSERT INTO users (username, passwd, email, name, active, standkey, sitkey, cond, startdate) VALUES(?,?,?,?,?,?,?,?,?)', (username, passwd, email, name, active, standkey, sitkey, condition, startdate))
     conn.commit()
     conn.close()
 
@@ -62,8 +89,8 @@ def addUser(username, passwd, email, name, status, standkey, sitkey, condition, 
 @app.route('/users/condition/<string:condition>')
 def usersByCondition(condition):
     conn = get_db_connection()
-    
-    rows = conn.execute(f"SELECT * FROM users WHERE condition = '{condition}'", ()).fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM users WHERE cond = '{condition}'", ()).fetchall()
     return json.dumps( [dict(ix) for ix in rows] )
 
 
@@ -71,14 +98,16 @@ def usersByCondition(condition):
 def usersByConditionGet():
     data = request.json   
     conn = get_db_connection()
-    rows = conn.execute(f"SELECT * FROM users WHERE condition = '{data['condition']}'", ()).fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM users WHERE cond = '{data['condition']}'", ()).fetchall()
     conn.close()
     return json.dumps( [dict(ix) for ix in rows] )
    
 @app.route('/desks')
 def allDesks():
     conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM desks').fetchall()
+    cur = conn.cursor()
+    rows = cur.execute('SELECT * FROM desks').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -95,24 +124,28 @@ def addDesk(macaddress, location):
 @app.route('/heights')
 def allHeights():
     conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM heights').fetchall()
+    cur = conn.cursor()
+    rows = cur.execute('SELECT * FROM heights').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
 @app.route('/deskjoins')
 def allDeskjoins():
     conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM deskjoins').fetchall()
+    cur = conn.cursor()
+    rows = cur.execute('SELECT * FROM deskjoins').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
 @app.route('/deskjoins/add/<string:username>/<string:location>')
 def addDeskjoin(username, location):
     conn = get_db_connection()
-    rows1 = conn.execute(f"SELECT * FROM users WHERE username = '{username}'", ()).fetchall()
+    cur = conn.cursor()
+    rows1 = cur.execute(f"SELECT * FROM users WHERE username = '{username}'", ()).fetchall()
     print(rows1)
     if len(rows1) > 0:
-        rows2 = conn.execute(f"SELECT * FROM desks WHERE location = '{location}'", ()).fetchall()
+        cur = conn.cursor()
+        rows2 = cur.execute(f"SELECT * FROM desks WHERE location = '{location}'", ()).fetchall()
         if len(rows2) > 0:
             cur = conn.cursor()
             cur.execute('INSERT INTO deskjoins (userid, deskid) VALUES(?,?)', (rows1[0]['userid'], rows2[0]['deskid']))
@@ -129,7 +162,8 @@ def addDeskjoin(username, location):
 @app.route('/commands')
 def allCommands():
     conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM commands').fetchall()
+    cur = conn.cursor()
+    rows = cur.execute('SELECT * FROM commands').fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -137,7 +171,8 @@ def allCommands():
 @app.route('/heights/id/<string:userid>')
 def heightsById(userid):
     conn = get_db_connection()
-    rows = conn.execute(f"SELECT * FROM heights WHERE userid = {userid}", ()).fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM heights WHERE userid = {userid}", ()).fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -146,10 +181,12 @@ def heightsByIdGet():
     data = request.json   
     conn = get_db_connection()
     if ('time' in data):
-        rows = conn.execute(f"SELECT * FROM heights WHERE (userid = {data['userid']}) AND (created > '{data['time']}')", ()).fetchall()
+        cur = conn.cursor()
+        rows = cur.execute(f"SELECT * FROM heights WHERE (userid = {data['userid']}) AND (created > '{data['time']}')", ()).fetchall()
         conn.close()
     else:
-        rows = conn.execute(f"SELECT * FROM heights WHERE userid = {data['userid']}", ()).fetchall()
+        cur = conn.cursor()
+        rows = cur.execute(f"SELECT * FROM heights WHERE userid = {data['userid']}", ()).fetchall()
         conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -158,7 +195,8 @@ def heightsByIdGet():
 @app.route('/heights/u/<string:username>')
 def heightsByUsername(username):
     conn = get_db_connection()
-    rows = conn.execute(f"SELECT * FROM heights JOIN users ON heights.userid = users.userid WHERE users.username = '{username}'").fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM heights JOIN users ON heights.userid = users.userid WHERE users.username = '{username}'").fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -167,9 +205,9 @@ def heightsByUsername(username):
 def addHeightPost():
     data = request.json
     conn = get_db_connection()
-
+    cur = conn.cursor()
     # We get the Macaddress of the desk - use this to look up the userid and then add the POSTed height to that userid
-    rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
+    rows = cur.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
 
     if (len(rows) == 1):
         if ('time' in data):
@@ -199,8 +237,8 @@ def addHeightPost():
 @app.route('/heights/add/<string:macaddress>/<string:height>/<int:time>')
 def addHeight(macaddress, height, time):
     conn = get_db_connection()
-
-    rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{macaddress}') AND (deskjoins.end IS NULL)").fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{macaddress}') AND (deskjoins.end IS NULL)").fetchall()
 
     if (len(rows) == 1):
         cur = conn.cursor()
@@ -216,12 +254,13 @@ def addHeight(macaddress, height, time):
 def commandsByIdGet():
     data = request.json   
     conn = get_db_connection()
-
+    cur = conn.cursor()
     # We get the Macaddress of the desk - use this to look up the userid and see if that userid has any commands
-    rows = conn.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
+    rows = cur.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.end IS NULL)").fetchall()
 
     if (len(rows) == 1):
-        newCommand = conn.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
+        cur = conn.cursor()
+        newCommand = cur.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)").fetchall()
         if(len(newCommand) >= 1):
         
             cur = conn.cursor()
@@ -242,7 +281,8 @@ def commandsByIdGet():
 @app.route('/commands/id/<string:userid>')
 def commandsById(userid):
     conn = get_db_connection()
-    rows = conn.execute(f"SELECT * FROM commands WHERE (userid = {userid})",()).fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM commands WHERE (userid = {userid})",()).fetchall()
     conn.close()
     return  json.dumps( [dict(ix) for ix in rows] )
 
@@ -250,8 +290,8 @@ def commandsById(userid):
 @app.route('/commands/add/<string:userid>/<string:command>')
 def addCommandById(userid, command):
     conn = get_db_connection()
-
-    rows = conn.execute(f"SELECT * FROM users WHERE users.userid = '{userid}'").fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM users WHERE users.userid = '{userid}'").fetchall()
 
     if (len(rows) == 1):
         cur = conn.cursor()
@@ -267,8 +307,8 @@ def addCommandById(userid, command):
 @app.route('/commands/add/<string:username>/<string:command>')
 def addCommandByUsername(username, command):
     conn = get_db_connection()
-
-    rows = conn.execute(f"SELECT * FROM users WHERE users.username = '{username}'").fetchall()
+    cur = conn.cursor()
+    rows = cur.execute(f"SELECT * FROM users WHERE users.username = '{username}'").fetchall()
 
     if (len(rows) == 1):
         cur = conn.cursor()
@@ -295,9 +335,11 @@ def addCommandPost():
 def addSmartCommand():
     data = request.json
     conn = get_db_connection()
-    rows1 = conn.execute(f"SELECT * FROM users WHERE username = '{data['username']}'").fetchall()
+    cur = conn.cursor()
+    rows1 = cur.execute(f"SELECT * FROM users WHERE username = '{data['username']}'").fetchall()
     if len(rows1) > 0:
-        rows2 = conn.execute(f"SELECT * FROM heights WHERE userid = '{rows1[0]['userid']}'").fetchall()
+        cur = conn.cursor()
+        rows2 = cur.execute(f"SELECT * FROM heights WHERE userid = '{rows1[0]['userid']}'").fetchall()
         if len(rows2) > 0:
             print('there are heights')
             print(rows2[-1]['height'])
@@ -321,10 +363,8 @@ def addSmartCommand():
     else:
         conn.close()
         return {"status":"error", "reason": "could not find user", "username": data['username']}
-    
-
 
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=3306)
+    app.run(host='0.0.0.0')

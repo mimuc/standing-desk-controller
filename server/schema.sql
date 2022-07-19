@@ -1,60 +1,58 @@
-PRAGMA foreign_keys = ON;
-
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-    userid INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INT(11) PRIMARY KEY AUTO_INCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    username TEXT NOT NULL,
-    passwd TEXT NOT NULL,
-    email TEXT NOT NULL,
-    name TEXT NOT NULL,
-    status INTEGER NOT NULL DEFAULT 1,
-    standkey INTEGER NOT NULL DEFAULT 1,
-    sitkey INTEGER NOT NULL DEFAULT 2,
-    condition TEXT NOT NULL, -- can be R, A, or S (regular interval, apple watch, or smart)
-    startdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- the date the user actually starts the experiment
+    username VARCHAR(255) NOT NULL,
+    active INT(11) NOT NULL DEFAULT 1,
+    standkey INT(11) NOT NULL DEFAULT 1,
+    sitkey INT(11) NOT NULL DEFAULT 2,
+    cond VARCHAR(255) NOT NULL,
+    startdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 
 DROP TABLE IF EXISTS desks;
 CREATE TABLE desks (
-    deskid INTEGER PRIMARY KEY AUTOINCREMENT,
+    deskid INT(11) PRIMARY KEY AUTO_INCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    macaddress TEXT NOT NULL,
-    location TEXT NOT NULL
+    macaddress VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL
 );
+
 
 DROP TABLE IF EXISTS heights;
 CREATE TABLE heights (
-    heightid INTEGER PRIMARY KEY AUTOINCREMENT,
+    heightid INT(11) PRIMARY KEY AUTO_INCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    time INTEGER NOT NULL,
-    userid INTEGER NOT NULL,
+    time INT(11) NOT NULL,
+    userid INT(11) NOT NULL,
     height REAL NOT NULL
 );
 
+
 DROP TABLE IF EXISTS actions;
 CREATE TABLE actions (
-    actionid INTEGER PRIMARY KEY AUTOINCREMENT,
+    actionid INT(11) PRIMARY KEY AUTO_INCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    time INTEGER NOT NULL,
-    userid INTEGER NOT NULL,
-    action TEXT NOT NULL -- manual keypresses, interface actions, and automatic actions
-);
-
-DROP TABLE IF EXISTS deskjoins;
-CREATE TABLE deskjoins (
-    deskjoinid INTEGER PRIMARY KEY AUTOINCREMENT,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    end TIMESTAMP,
-    deskid INTEGER NOT NULL,
-    userid INTEGER NOT NULL
+    time INT(11) NOT NULL,
+    userid INT(11) NOT NULL,
+    action VARCHAR(255) NOT NULL
 );
 
 DROP TABLE IF EXISTS commands;
 CREATE TABLE commands (
-    commandid INTEGER PRIMARY KEY AUTOINCREMENT,
+    commandid INT(11) PRIMARY KEY AUTO_INCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    userid INTEGER NOT NULL,
-    command REAL NOT NULL, -- any of keys 1,2,3,4 or a specific height in cm to move to
-    done INTEGER NOT NULL DEFAULT 0
+    userid INT(11) NOT NULL,
+    command REAL NOT NULL,
+    done INT(11) NOT NULL DEFAULT 0
     );
+
+DROP TABLE IF EXISTS deskjoins;
+CREATE TABLE deskjoins (
+    deskjoinid INT(11) PRIMARY KEY AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end TIMESTAMP,
+    deskid INT(11) NOT NULL,
+    userid INT(11) NOT NULL
+);

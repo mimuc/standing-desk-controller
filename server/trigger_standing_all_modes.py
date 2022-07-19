@@ -14,9 +14,14 @@ now = (datetime.utcnow())
 time_threshold = (now - timedelta(seconds=time_threshold_second)).strftime("%Y-%m-%d %H:%M:%S")
 
 
-get_users_url = 'http://141.84.8.105:5000/users/condition'
-get_heights_url = 'http://141.84.8.105:5000/heights/id'
-post_commands_url = 'http://141.84.8.105:5000/commands/add'
+# get_users_url = 'http://141.84.8.105:5000/users/condition'
+# get_heights_url = 'http://141.84.8.105:5000/heights/id'
+# post_commands_url = 'http://141.84.8.105:5000/commands/add'
+
+get_users_url = 'https://desks.medien.ifi.lmu.de/users/condition'
+get_heights_url = 'https://desks.medien.ifi.lmu.de/heights/id'
+post_commands_url = 'https://desks.medien.ifi.lmu.de/commands/add'
+
 header = {'Content-Type': 'application/json; charset=utf-8'}
 
 # This one only cares about users in condiiton A (apple watch style)

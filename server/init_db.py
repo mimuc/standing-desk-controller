@@ -18,14 +18,14 @@ def initdb(file, overwrite=None):
         connection = sqlite3.connect(file)
 
 
-        with open('./schema.sql') as f:
+        with open('./schemalite.sql') as f:
             connection.executescript(f.read())
 
         cur = connection.cursor()
 
 
         cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    ('luke', '1234', 'luke.haliburton@ifi.lmu.de', 'Luke Haliburton', 1, 1, 2, 'S')
+                    ('luke', '1234', 'luke.haliburton@ifi.lmu.de', 'Luke Haliburton', 1, 1, 2, 'R')
                     )
         userid = cur.lastrowid
 
@@ -33,20 +33,6 @@ def initdb(file, overwrite=None):
                     ('10:27:f5:78:28:a4', '441 right')
                     )
 
-        cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (?, ?)",
-                    (cur.lastrowid, userid)
-                    )
-
-        cur.execute("INSERT INTO users (username, passwd, email, name, status, standkey, sitkey, condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    ('robin', '1234', 'robin.welsch@ifi.lmu.de',  'Robin Welsch', 1, 2, 1, 'R')
-                    )
-
-        userid = cur.lastrowid
-
-        cur.execute("INSERT INTO desks (macaddress, location) VALUES (?, ?)",
-                    ('AA-14-22-04-25-37', '441 left')
-                    )
-                    
         cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (?, ?)",
                     (cur.lastrowid, userid)
                     )
