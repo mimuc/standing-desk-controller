@@ -27,7 +27,6 @@ C:\Users\halib\OneDrive\Desktop\keymousespeed01_alpha2_1\keymousespeed01_alpha2_
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Debug\keymousespeed01.exe.config
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Debug\keymousespeed01.exe
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Debug\keymousespeed01.pdb
-C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Debug\keymousespeed01.csprojAssemblyReference.cache
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Debug\keymousespeed01.Form1.resources
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Debug\keymousespeed01.Properties.Resources.resources
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Debug\keymousespeed01.csproj.GenerateResource.cache

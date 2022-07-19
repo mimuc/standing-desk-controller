@@ -11,7 +11,7 @@ namespace keymousespeed01
 {
     class postToServer
     {
-        private static string serverUrl_post = "http://141.84.8.105:5000/smart/add";
+        private static string serverUrl_post = "http://desks.medien.ifi.lmu.de/smart/add";
         private static readonly HttpClient client = new HttpClient();
 
 
