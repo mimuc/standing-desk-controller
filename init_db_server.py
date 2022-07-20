@@ -20,20 +20,20 @@ def initdb(connection, overwrite=None):
             if command.strip() != '':
                 cur.execute(command)
     
-   
+    # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
     ("luke", "1", "1", "2", "R", "2022-07-10"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
-                ("Achilles", "441right")
+                ("Apollo", "441right")
                 )
 
     cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
                 (str(cur.lastrowid), str(userid))
                 )
 
-
+    # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
     ("JanLeusman", "1", "1", "2", "R", "2022-07-12"))
     userid = cur.lastrowid
@@ -45,6 +45,72 @@ def initdb(connection, overwrite=None):
     cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
                 (str(cur.lastrowid), str(userid))
                 )
+
+    # User
+    cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
+    ("fakeuser1", "1", "1", "2", "R", "2022-07-20"))
+    userid = cur.lastrowid
+
+    cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
+                ("Hades", "fakeroom1")
+                )
+
+    cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
+                (str(cur.lastrowid), str(userid))
+                )
+
+    # User
+    cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
+    ("fakeuser2", "1", "1", "2", "R", "2022-07-20"))
+    userid = cur.lastrowid
+
+    cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
+                ("Achilles", "fakeroom2")
+                )
+
+    cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
+                (str(cur.lastrowid), str(userid))
+                )
+    
+    # User
+    cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
+    ("fakeuser3", "1", "1", "2", "R", "2022-07-20"))
+    userid = cur.lastrowid
+
+    cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
+                ("Dionysus", "fakeroom3")
+                )
+
+    cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
+                (str(cur.lastrowid), str(userid))
+                )
+    
+    # User
+    cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
+    ("fakeuser4", "1", "1", "2", "R", "2022-07-20"))
+    userid = cur.lastrowid
+
+    cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
+                ("Chronos", "fakeroom4")
+                )
+
+    cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
+                (str(cur.lastrowid), str(userid))
+                )
+    
+    # User
+    cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
+    ("fakeuser5", "1", "1", "2", "R", "2022-07-20"))
+    userid = cur.lastrowid
+
+    cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
+                ("Poseidon", "fakeroom5")
+                )
+
+    cur.execute("INSERT INTO deskjoins (deskid, userid) VALUES (%s, %s)",
+                (str(cur.lastrowid), str(userid))
+                )
+    
     connection.commit()
     connection.close()
            
