@@ -46,3 +46,18 @@ CREATE TABLE deskjoins (
     deskid INT(11) NOT NULL,
     userid INT(11) NOT NULL
 );
+
+DROP TABLE IF EXISTS startupLogger;
+CREATE TABLE startupLogger (
+    logid INT(11) PRIMARY KEY AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    macaddress VARCHAR(255) NOT NULL,
+    versionNumber VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS accessLogger;
+CREATE TABLE accessLogger (
+    accessid INT(11) PRIMARY KEY AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    macaddress VARCHAR(255) NOT NULL
+);

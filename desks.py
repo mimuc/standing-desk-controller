@@ -270,7 +270,7 @@ def addHeight(macaddress, height, heighttime):
 
     if (len(rows) == 1):
         cursor = conn.cursor(dictionary=True)
-        cursor.execute('INSERT INTO heights (heighttime, userid, height) VALUES(?,?,?)', (heighttime, rows[0]["userid"], height))
+        cursor.execute('INSERT INTO heights (heighttime, userid, height) VALUES(%s,%s,%s)', (heighttime, rows[0]["userid"], height))
         conn.commit()
         conn.close()
         return  {"status":"added", "id":cursor.lastrowid}
@@ -297,30 +297,30 @@ def commandsByIdGet():
         
 @app.route('/commands/mac', methods=['GET'])
 def commandsByMacGet():
-    data = request.json   
+    data = request.json
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    cursor.execute('INSERT INTO accessLogger (macaddress) VALUES(%s)', (data['macaddress'],))
+   
     # We get the Macaddress of the desk - use this to look up the userid and see if that userid has any commands
     cursor.execute(f"SELECT * FROM (deskjoins INNER JOIN users ON deskjoins.userid = users.userid) INNER JOIN desks ON deskjoins.deskid = desks.deskid WHERE (desks.macaddress = '{data['macaddress']}') AND (deskjoins.enddate IS NULL)")
     rows = cursor.fetchall()
-
+    
     if (len(rows) == 1):
-        cursor2 = conn.cursor(dictionary=True)
-        cursor2.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)")
-        newCommand = cursor2.fetchall()
+        cursor.execute(f"SELECT * FROM commands WHERE (userid = '{rows[0]['userid']}' AND done = 0)")
+        newCommand = cursor.fetchall()
         if(len(newCommand) >= 1):
-        
-            cursor3 = conn.cursor()
-            cursor3.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
+    
+            cursor.execute(f"UPDATE commands SET done = 1 WHERE commandid = '{newCommand[0]['commandid']}'")
             conn.commit()
-           
-
             conn.close()
             return  {"status": "success", "command": newCommand[0]['command']}
         else:
+            conn.commit()
             conn.close()
             return {"status": "success", "command": None}
     else:
+        conn.commit()
         conn.close()
         return  {"status":"error", "macaddress": data['macaddress']}
 
@@ -411,6 +411,16 @@ def addSmartCommand():
         conn.close()
         return {"status":"error", "reason": "could not find user", "username": data['username']}
 
+@app.route('/startupLogger/add', methods=['POST']) 
+def addStartupLogPost():
+    data = request.json
+    conn = get_db_connection()
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('INSERT INTO startupLogger (macaddress, versionNumber) VALUES(%s ,%s)', (data['macaddress'], data['versionNumber']))
+    conn.commit()
+    conn.close()
+    return  {"status":"added", "id":cursor.lastrowid}
 
 
 if __name__ == "__main__":
