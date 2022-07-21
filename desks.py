@@ -3,10 +3,11 @@ sys.path.append(os.getcwd())
 
 # import sqlite3
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_apscheduler import APScheduler
 import trigger_standing_all_modes
 import mysql.connector
+from datetime import datetime
 
 standing_threshold = 900
 # DATABASE_FILE = "database.db"
@@ -65,6 +66,52 @@ def trigger_standing():
 def index():
     return '''<h1 style='color:#00883A'>Welcome to LMU Standing Desks!</h1>
     <p>This project is created and operated by Luke Haliburton, Prof. Dr. Sven Mayer, and Prof. Dr. Albrecht Schmidt from LMU Munich</p>'''
+
+
+@app.route("/status")
+def status():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM desks")
+    rows = cursor.fetchall()
+   
+    boards = []
+    boots = []
+    actives = []
+    for row in rows:
+        boards.append(row['macaddress'])
+        cursor.execute(f"SELECT * FROM startupLogger WHERE macaddress = '{row['macaddress']}' ORDER BY created DESC LIMIT 1", ())
+        rows = cursor.fetchall()
+        # boots.append(rows)
+        if len(rows) > 0:
+            for row in rows:
+                boots.append(row['created'])
+        else:
+            boots.append('Not booted yet')
+        
+        cursor.execute(f"SELECT * FROM accessLogger WHERE macaddress = '{row['macaddress']}' ORDER BY created DESC LIMIT 1", ())
+        rows = cursor.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                actives.append('Not Active' if (datetime.now() - row['created']).total_seconds() > 240 else 'Active'  )
+        else:
+            actives.append('Not active yet')
+
+
+    return render_template('status.html', board1=boards[0], boot1=boots[0], active1=actives[0],
+    board2=boards[1], boot2=boots[1], active2=actives[1],
+    board3=boards[2], boot3=boots[2], active3=actives[2],
+    board4=boards[3], boot4=boots[3], active4=actives[3],
+    board5=boards[4], boot5=boots[4], active5=actives[4],
+    board6=boards[5], boot6=boots[5], active6=actives[5],
+    board7=boards[6], boot7=boots[6], active7=actives[6],
+    board8=boards[7], boot8=boots[7], active8=actives[7],
+    board9=boards[8], boot9=boots[8], active9=actives[8],
+    board10=boards[9], boot10=boots[9], active10=actives[0],
+    board11=boards[10], boot11=boots[10], active11=actives[10],
+    board12=boards[11], boot12=boots[11], active12=actives[11],
+    board13=boards[12], boot13=boots[12], active13=actives[12],
+    board14=boards[13], boot14=boots[13], active14=actives[13])
 
 
 
@@ -421,6 +468,26 @@ def addStartupLogPost():
     conn.commit()
     conn.close()
     return  {"status":"added", "id":cursor.lastrowid}
+
+@app.route('/startupLogger/macaddress', methods=['GET'])
+def startupLogByMac():
+    data = request.json   
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(f"SELECT * FROM startupLogger WHERE macaddress = '{data['macaddress']}' ORDER BY created DESC LIMIT 10", ())
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify(rows)
+
+@app.route('/accessLogger/macaddress', methods=['GET'])
+def accessLogByMac():
+    data = request.json   
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(f"SELECT * FROM accessLogger WHERE macaddress = '{data['macaddress']}' ORDER BY created DESC LIMIT 10", ())
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify(rows)
 
 
 if __name__ == "__main__":

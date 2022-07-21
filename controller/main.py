@@ -17,8 +17,8 @@ from sys import platform
 gc.collect()
 
 # Set Device Name and Version Number
-versionNumber = "0.03"
-mac = "Ares"
+versionNumber = "0.05"
+mac = "Adonis"
 print("mac address: ", mac)
 
 
@@ -245,7 +245,7 @@ while True:
           
 
         # Start sending when idle
-        if ((int(a) == 0) & (int(b)==0) & (len(buffer) > 1) & (wlan.isconnected())):
+        if ((int(a) == 0) & (int(b)==0) & (len(buffer) > 0) & (wlan.isconnected())):
             lstHeight = []
             lstTime = []
             for e in buffer:
@@ -292,7 +292,7 @@ while True:
             wlan = connectToWifi(ssid, passwd)
     except Exception as MainException:
         print('Main exception: ', MainException)
-        reset()
+        machine.reset()
 
 
 
