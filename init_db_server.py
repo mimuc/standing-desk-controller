@@ -22,7 +22,7 @@ def initdb(connection, overwrite=None):
     
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("luke", "1", "1", "2", "R", "2022-07-10"))
+    ("luke", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -35,7 +35,7 @@ def initdb(connection, overwrite=None):
 
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("JanLeusman", "1", "1", "2", "R", "2022-07-12"))
+    ("JanLeusman", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -48,7 +48,7 @@ def initdb(connection, overwrite=None):
 
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser1", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser1", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -61,7 +61,7 @@ def initdb(connection, overwrite=None):
 
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser2", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser2", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -74,7 +74,7 @@ def initdb(connection, overwrite=None):
     
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser3", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser3", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -87,7 +87,7 @@ def initdb(connection, overwrite=None):
     
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser4", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser4", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -100,7 +100,7 @@ def initdb(connection, overwrite=None):
     
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser5", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser5", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -113,7 +113,7 @@ def initdb(connection, overwrite=None):
     
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser6", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser6", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -127,7 +127,7 @@ def initdb(connection, overwrite=None):
    
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser7", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser7", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -140,7 +140,7 @@ def initdb(connection, overwrite=None):
    
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser8", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser8", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -153,7 +153,7 @@ def initdb(connection, overwrite=None):
    
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser9", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser9", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -166,7 +166,7 @@ def initdb(connection, overwrite=None):
    
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser10", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser10", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -179,7 +179,7 @@ def initdb(connection, overwrite=None):
    
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser11", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser11", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",
@@ -192,7 +192,7 @@ def initdb(connection, overwrite=None):
      
     # User
     cur.execute("INSERT INTO users (username, active, standkey, sitkey, cond, startdate) VALUES (%s, %s, %s, %s, %s, %s)",
-    ("fakeuser12", "1", "1", "2", "R", "2022-07-20"))
+    ("fakeuser12", "1", "1", "2", "R", "2022-07-26"))
     userid = cur.lastrowid
 
     cur.execute("INSERT INTO desks (macaddress, desklocation) VALUES (%s, %s)",

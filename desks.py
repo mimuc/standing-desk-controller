@@ -77,6 +77,7 @@ def status():
    
     boards = []
     boots = []
+    lasts = []
     actives = []
     for row in rows:
         boards.append(row['macaddress'])
@@ -93,25 +94,27 @@ def status():
         rows = cursor.fetchall()
         if len(rows) > 0:
             for row in rows:
+                lasts.append(row['created'])
                 actives.append('Not Active' if (datetime.now() - row['created']).total_seconds() > 240 else 'Active'  )
         else:
+            lasts.append('Not active yet')
             actives.append('Not active yet')
 
 
-    return render_template('status.html', board1=boards[0], boot1=boots[0], active1=actives[0],
-    board2=boards[1], boot2=boots[1], active2=actives[1],
-    board3=boards[2], boot3=boots[2], active3=actives[2],
-    board4=boards[3], boot4=boots[3], active4=actives[3],
-    board5=boards[4], boot5=boots[4], active5=actives[4],
-    board6=boards[5], boot6=boots[5], active6=actives[5],
-    board7=boards[6], boot7=boots[6], active7=actives[6],
-    board8=boards[7], boot8=boots[7], active8=actives[7],
-    board9=boards[8], boot9=boots[8], active9=actives[8],
-    board10=boards[9], boot10=boots[9], active10=actives[0],
-    board11=boards[10], boot11=boots[10], active11=actives[10],
-    board12=boards[11], boot12=boots[11], active12=actives[11],
-    board13=boards[12], boot13=boots[12], active13=actives[12],
-    board14=boards[13], boot14=boots[13], active14=actives[13])
+    return render_template('status.html', board1=boards[0], boot1=boots[0], last1=lasts[0], active1=actives[0],
+    board2=boards[1], boot2=boots[1], last2=lasts[1],  active2=actives[1],
+    board3=boards[2], boot3=boots[2], last3=lasts[2],  active3=actives[2],
+    board4=boards[3], boot4=boots[3], last4=lasts[3],  active4=actives[3],
+    board5=boards[4], boot5=boots[4], last5=lasts[4],  active5=actives[4],
+    board6=boards[5], boot6=boots[5], last6=lasts[5],  active6=actives[5],
+    board7=boards[6], boot7=boots[6], last7=lasts[6],  active7=actives[6],
+    board8=boards[7], boot8=boots[7], last8=lasts[7],  active8=actives[7],
+    board9=boards[8], boot9=boots[8], last9=lasts[8],  active9=actives[8],
+    board10=boards[9], boot10=boots[9], last10=lasts[9],  active10=actives[0],
+    board11=boards[10], boot11=boots[10], last11=lasts[10],  active11=actives[10],
+    board12=boards[11], boot12=boots[11], last12=lasts[11],  active12=actives[11],
+    board13=boards[12], boot13=boots[12], last13=lasts[12],  active13=actives[12],
+    board14=boards[13], boot14=boots[13], last14=lasts[13],  active14=actives[13])
 
 
 
