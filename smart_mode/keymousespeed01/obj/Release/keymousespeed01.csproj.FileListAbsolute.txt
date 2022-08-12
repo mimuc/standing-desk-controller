@@ -23,12 +23,11 @@ C:\Users\halib\OneDrive\Desktop\keymousespeed01_alpha2_1\keymousespeed01_alpha2_
 C:\Users\halib\OneDrive\Desktop\keymousespeed01_alpha2_1\keymousespeed01_alpha2_1\keymousespeed01\obj\Release\keymousespeed01.csproj.GenerateResource.cache
 C:\Users\halib\OneDrive\Desktop\keymousespeed01_alpha2_1\keymousespeed01_alpha2_1\keymousespeed01\obj\Release\keymousespeed01.exe
 C:\Users\halib\OneDrive\Desktop\keymousespeed01_alpha2_1\keymousespeed01_alpha2_1\keymousespeed01\obj\Release\keymousespeed01.pdb
-C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.exe
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Release\keymousespeed01.exe.config
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Release\keymousespeed01.exe
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\bin\Release\keymousespeed01.pdb
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.Form1.resources
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.Properties.Resources.resources
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.csproj.GenerateResource.cache
+C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.exe
 C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.pdb
-C:\Users\halib\Coding Projects\standing-desk-controller\smart_mode\keymousespeed01\obj\Release\keymousespeed01.csprojAssemblyReference.cache

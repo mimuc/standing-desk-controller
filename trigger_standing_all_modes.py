@@ -48,7 +48,6 @@ def run():
         # loop through each user in the database
         for user in users:
             # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
-            # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
             if len(user['startdate']) == 10:
                 started_time = datetime.strptime(user['startdate'], '%Y-%m-%d')
             elif len(user['startdate']) == 29:
@@ -56,7 +55,7 @@ def run():
             else:
                 started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
             experiment_day = (now - started_time).days
-            if (experiment_day >=7) and (experiment_day <14):
+            if (experiment_day >=7):
                 # first check if the user already has commands (trying to handle jobs in multiple threads)
                 get_command_json = {"userid": user['userid']}
                 response = requests.get(get_commands_url, json=get_command_json, headers=header) # test version with no filter
@@ -94,7 +93,7 @@ def run():
             else:
                 started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
             experiment_day = (now - started_time).days
-            if (experiment_day >=7) and (experiment_day <14):
+            if (experiment_day >= 7):
                 # first check if the user already has commands (trying to handle jobs in multiple threads)
                 get_command_json = {"userid": user['userid']}
                 response = requests.get(get_commands_url, json=get_command_json, headers=header) # test version with no filter
