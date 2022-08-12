@@ -25,14 +25,16 @@ cursor = conn.cursor(dictionary=True)
 # cursor.execute("DROP TABLE IF EXISTS commands")
 # cursor.execute("CREATE TABLE commands (commandid INT(11) PRIMARY KEY AUTO_INCREMENT, userid INT(11))") 
 # conn.commit()
-import init_db_server
-init_db_server.initdb(conn)
+
+# ONLY EVER UNCOMMENT THIS IF YOU WANT TO RESET THE DATABASE!!
+# import init_db_server
+# init_db_server.initdb(conn)
 
 
 # mysql.init_app(app)
 
-# def trigger_standing():
-#     trigger_standing_all_modes.run()
+def trigger_standing():
+    trigger_standing_all_modes.run()
     
 
 
@@ -52,15 +54,15 @@ def get_db_connection():
 
 
 scheduler = APScheduler()
-# scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=43, max_instances=1)
+scheduler.add_job(func=trigger_standing, trigger='cron', id='job1', minute=50, max_instances=1)
 scheduler.init_app(app)
 scheduler.start()
 
 
 
-@scheduler.task("cron", id="job1", minute=50, max_instances=1)
-def trigger_standing():
-    trigger_standing_all_modes.run()
+# @scheduler.task("cron", id="job1", minute=50, max_instances=1)
+# def trigger_standing():
+#     trigger_standing_all_modes.run()
 
 @app.route("/")
 def index():
@@ -256,16 +258,18 @@ def heightsById(userid):
 def heightsByIdGet():
     data = request.json   
     conn = get_db_connection()
-    if ('heighttime' in data):
+    # if the request is time limited, only get recent heights
+    if ('time' in data):
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(f"SELECT * FROM heights WHERE (userid = {data['userid']}) AND (created > '{data['heighttime']}')", ())
+        cursor.execute(f"SELECT * FROM heights WHERE (userid = {data['userid']}) AND (created > '{data['time']}')", ())
         rows = cursor.fetchall()
-        conn.close()
+
+    # otherwise get them all
     else:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(f"SELECT * FROM heights WHERE userid = {data['userid']}", ())
         rows = cursor.fetchall()
-        conn.close()
+        
     
     conn.close()
     return  jsonify(rows)
