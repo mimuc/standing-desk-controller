@@ -17,8 +17,8 @@ from sys import platform
 gc.collect()
 
 # Set Device Name and Version Number
-versionNumber = "0.05"
-mac = "Adonis"
+versionNumber = "0.06"
+mac = "Athena"
 print("mac address: ", mac)
 
 
@@ -281,7 +281,7 @@ while True:
             lastHeight = currentHeight
           
         # if the desk is not moving, look for commands on the server
-        if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 5) ):
+        if ((int(a) == 0) & (int(b)==0) & (len(buffer) == 0) & (wlan.isconnected()) & ((time.time() - last_time_get) >= 30) ):
             get_data = {"macaddress": mac}
             get_request(get_data)
             last_time_get = time.time()
