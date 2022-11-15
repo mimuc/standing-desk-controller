@@ -36,45 +36,6 @@ def send_post_command(command_json):
 
         
 def run():
-
-    ############ First, fetch all users who are in the R condition (regular interval mode) ##################
-    print('Running R condition!')
-    response = requests.get(get_users_url, json=users_json_r, headers=header) # test version with no filter
-    users = response.json()
-
-
-    # If there are any users in this condition, check if they are in the active portion
-    if(len(users) > 0):
-        # loop through each user in the database
-        for user in users:
-            # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
-            if len(user['startdate']) == 10:
-                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d')
-            elif len(user['startdate']) == 29:
-                started_time = datetime.strptime(user['startdate'], '%a, %d %b %Y %H:%M:%S %Z')
-            else:
-                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
-            experiment_day = (now - started_time).days
-            if (experiment_day >=7):
-                # first check if the user already has commands (trying to handle jobs in multiple threads)
-                get_command_json = {"userid": user['userid']}
-                response = requests.get(get_commands_url, json=get_command_json, headers=header) # test version with no filter
-                commands = response.json()
-                if commands['command'] is None:
-                    # Create the command post request
-                    command_json = {"command": user['standkey'], "userid": user['userid']}
-                    # Post standing command to database for each user
-                    send_post_command(command_json)
-                    # print('posting')
-                else:
-                    print('already has a command')
-            # If they are not within the active week, do nothing
-            else:
-                print ("Not in active R condition, currently on day ", experiment_day)
-    else:
-        print('No users')
-
-    
     ############### Second do the A condition (apple watch style) ################
     print('Running A condition')
     response = requests.get(get_users_url, json=users_json_a, headers=header) # test version with no filter
@@ -129,4 +90,44 @@ def run():
                 print ("Not in active A condition, currently on day ", experiment_day)
     else:
         print('No users')
+
+    ############ First, fetch all users who are in the R condition (regular interval mode) ##################
+    print('Running R condition!')
+    response = requests.get(get_users_url, json=users_json_r, headers=header) # test version with no filter
+    users = response.json()
+
+
+    # If there are any users in this condition, check if they are in the active portion
+    if(len(users) > 0):
+        # loop through each user in the database
+        for user in users:
+            # Check if they are in the active week (timeline is 1 week manual, 1 week active, 1 week manual)
+            if len(user['startdate']) == 10:
+                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d')
+            elif len(user['startdate']) == 29:
+                started_time = datetime.strptime(user['startdate'], '%a, %d %b %Y %H:%M:%S %Z')
+            else:
+                started_time = datetime.strptime(user['startdate'], '%Y-%m-%d %H:%M:%S')
+            experiment_day = (now - started_time).days
+            if (experiment_day >=7):
+                # first check if the user already has commands (trying to handle jobs in multiple threads)
+                get_command_json = {"userid": user['userid']}
+                response = requests.get(get_commands_url, json=get_command_json, headers=header) # test version with no filter
+                commands = response.json()
+                if commands['command'] is None:
+                    # Create the command post request
+                    command_json = {"command": user['standkey'], "userid": user['userid']}
+                    # Post standing command to database for each user
+                    send_post_command(command_json)
+                    # print('posting')
+                else:
+                    print('already has a command')
+            # If they are not within the active week, do nothing
+            else:
+                print ("Not in active R condition, currently on day ", experiment_day)
+    else:
+        print('No users')
+
+    
+    
 

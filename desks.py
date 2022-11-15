@@ -112,11 +112,18 @@ def status():
     board7=boards[6], boot7=boots[6], last7=lasts[6],  active7=actives[6],
     board8=boards[7], boot8=boots[7], last8=lasts[7],  active8=actives[7],
     board9=boards[8], boot9=boots[8], last9=lasts[8],  active9=actives[8],
-    board10=boards[9], boot10=boots[9], last10=lasts[9],  active10=actives[0],
+    board10=boards[9], boot10=boots[9], last10=lasts[9],  active10=actives[9],
     board11=boards[10], boot11=boots[10], last11=lasts[10],  active11=actives[10],
     board12=boards[11], boot12=boots[11], last12=lasts[11],  active12=actives[11],
     board13=boards[12], boot13=boots[12], last13=lasts[12],  active13=actives[12],
-    board14=boards[13], boot14=boots[13], last14=lasts[13],  active14=actives[13])
+    board14=boards[13], boot14=boots[13], last14=lasts[13],  active14=actives[13],
+    board15=boards[14], boot15=boots[14], last15=lasts[14],  active15=actives[14],
+    board16=boards[15], boot16=boots[15], last16=lasts[15],  active16=actives[15],
+    board17=boards[16], boot17=boots[16], last17=lasts[16],  active17=actives[16],
+    board18=boards[17], boot18=boots[17], last18=lasts[17],  active18=actives[17],
+    board19=boards[18], boot19=boots[18], last19=lasts[18],  active19=actives[18],
+    board20=boards[19], boot20=boots[19], last20=lasts[19],  active20=actives[19],
+    board21=boards[20], boot21=boots[20], last21=lasts[20],  active21=actives[20])
 
 
 
@@ -159,7 +166,7 @@ def usersByConditionGet():
     data = request.json   
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(f"SELECT * FROM users WHERE cond = '{data['condition']}'", ())
+    cursor.execute(f"SELECT * FROM users WHERE (cond = '{data['condition']}') AND (active = 1)", ())
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
